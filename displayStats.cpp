@@ -69,9 +69,13 @@ static protocolTCP *tcpStats = NULL;
         starttime = trace_get_seconds(pkt);
        
  
+        if(ppkt == NULL)
+            ppkt = new m_Packet;
+
         //Fill Ethernet details
-        //memcpy(ppkt->ethernetlayer.ether_dhost,ether_dhost,6);
-        //memcpy(ppkt->ethernetlayer.ether_shost , ether_shost,6);
+        memcpy(ppkt->ethernetlayer.ether_dhost,ether_dhost,6);
+        memcpy(ppkt->ethernetlayer.ether_shost , ether_shost,6);
+ 
         ppkt->ethernetlayer.ether_type = ethertype; 
 		
              if(ppkt == NULL)
