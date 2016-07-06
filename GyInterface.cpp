@@ -1,15 +1,16 @@
-#include "GxInterface.h"
+#include "GyInterface.h"
 #include <map>
 #include <string>
+#include <time.h>
 
-GxInterface::GxInterface()
+GyInterface::GyInterface()
 {
-    memset(&GxStats,0,sizeof(CCGxStats));
+    memset(&GyStats,0,sizeof(CCGyStats));
     startTime = 0;
     endTime   = 0;
 }
 
-int GxInterface::addPkt(Diameter &pkt)
+int GyInterface::addPkt(Diameter &pkt)
 {
     std::map<unsigned int, std::map<uint32_t, unsigned int> >::iterator it;
     std::map<uint32_t, unsigned int>::iterator it1;
@@ -37,7 +38,7 @@ int GxInterface::addPkt(Diameter &pkt)
     {
         case 1:
             /* Handle Request */
-            GxStats.attempts[reqtype-1]++;
+            GyStats.attempts[reqtype-1]++;
             it = req.find(reqtype);
             if(it != req.end())
             {
@@ -59,20 +60,20 @@ int GxInterface::addPkt(Diameter &pkt)
             it1 = tmp.find(pkt.getHopIdentifier());
             if(it1 == tmp.end())
             {
-                GxStats.unKnwRes[reqtype-1]++;
+                GyStats.unKnwRes[reqtype-1]++;
             }
             else
             {
                 if(pkt.getResCode() < 3000 || pkt.getResCode() == 70001)
                 {
-                    GxStats.succCount[reqtype-1]++;
+                    GyStats.succCount[reqtype-1]++;
                 }
                 else
                 {
-                    GxStats.failCount[reqtype-1]++;
+                    GyStats.failCount[reqtype-1]++;
                 }
 
-                GxStats.latency[reqtype-1] = ((GxStats.latency[reqtype-1])*(GxStats.latencySize[reqtype-1]) + (pkt.getTimestamp()-(it1->second)) / (++GxStats.latencySize[reqtype-1]));
+                GyStats.latency[reqtype-1] = ((GyStats.latency[reqtype-1])*(GyStats.latencySize[reqtype-1]) + (pkt.getTimestamp()-(it1->second)) / (++GyStats.latencySize[reqtype-1]));
             }
 
             /* Delete the request from map */
@@ -86,7 +87,7 @@ int GxInterface::addPkt(Diameter &pkt)
     return 0;
 }
 
-void GxInterface::printStats()
+void GyInterface::printStats()
 {
     char TimeBuf[300];
     time_t curT = startTime;
@@ -111,13 +112,13 @@ void GxInterface::printStats()
                 break;
         }
 
-        std::cout << "splunk " << curTime << " DIAMETER " << "Interface=" << "Gx"                    << " "
-                                                          << "Type="      << msgType                 << " "
-                                                          << "Attempts="  << GxStats.attempts[i]     << " "
-                                                          << "Success="   << GxStats.succCount[i]    << " " 
-                                                          << "Fail="      << GxStats.failCount[i]    << " " 
-                                                          << "Timeout="   << GxStats.timeoutCount[i] << " " 
-                                                          << "Latency="   << GxStats.latency[i]      << std::endl;
+        std::cout << "splunk " << curTime << " DIAMETER " << "Interface=" << "Gy"                   << " "
+                                                          << "Type="      << msgType                << " "
+                                                          << "Attempts=" << GyStats.attempts[i]     << " "
+                                                          << "Success="  << GyStats.succCount[i]    << " " 
+                                                          << "Fail="     << GyStats.failCount[i]    << " " 
+                                                          << "Timeout="  << GyStats.timeoutCount[i] << " " 
+                                                          << "Latency="  << GyStats.latency[i]      << std::endl;
     }
 
     /*
@@ -148,9 +149,9 @@ void GxInterface::printStats()
     */
 }
 
-void GxInterface::clearStats()
+void GyInterface::clearStats()
 {
-    memset(&GxStats,0,sizeof(CCGxStats));
+    memset(&GyStats,0,sizeof(CCGyStats));
     std::map<unsigned int, std::map<uint32_t, unsigned int> >::iterator it;
     std::map<uint32_t, unsigned int>::iterator it1;
     std::map<uint32_t, unsigned int> tmp;
@@ -163,7 +164,7 @@ void GxInterface::clearStats()
         {
             if(it1->second + DIAMETER_TIMEOUT < endTime)
             {
-                GxStats.timeoutCount[reqtype-1]++;
+                GyStats.timeoutCount[reqtype-1]++;
                 tmp.erase(it1->first); 
             }
         }

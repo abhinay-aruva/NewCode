@@ -20,14 +20,15 @@ enum Iface
 {
      GX  = 16777238,
      GY  = 4,
-     S6B = 16777250, 
+     S6B = 16777999, 
      DefaultAppID
 };
 
 enum CC
 {
-        CCRorA = 272, 
-        STRorA = 275, 
+        CCRorA         = 272, 
+        S6BAA          = 265, 
+        S6BTERMINATE   = 275, 
         DefaultCommandCode
 };
 

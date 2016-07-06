@@ -1,56 +1,52 @@
-#include "GxInterface.h"
 #include <map>
 #include <string>
+#include <time.h>
+#include "S6bInterface.h"
 
-GxInterface::GxInterface()
+S6BInterface::S6BInterface()
 {
-    memset(&GxStats,0,sizeof(CCGxStats));
+    memset(&s6bStats,0,sizeof(s6bStats));
     startTime = 0;
     endTime   = 0;
 }
 
-int GxInterface::addPkt(Diameter &pkt)
+int S6BInterface::addPkt(Diameter &pkt)
 {
     std::map<unsigned int, std::map<uint32_t, unsigned int> >::iterator it;
     std::map<uint32_t, unsigned int>::iterator it1;
     std::map<uint32_t, unsigned int> tmp;
+    MSGType msgType = DEFAULT;  
 
-    if(pkt.getCC() != CCRorA)
+    switch(pkt.getCC())
     {
-        return 1;
-    }
-
-    unsigned int reqtype = pkt.getReqType();
-    switch(reqtype)
-    {
-       case INITIAL:
-           break;
-       case UPDATE:
-           break;
-       case TERMINATE:
-           break;
-       default :
-           return 1;
+        case S6BAA:
+            msgType = AA;
+            break;
+        case S6BTERMINATE:
+            msgType = TERM;
+            break;
+        default:
+            return 1;
     }
 
     switch(pkt.getRequest())
     {
         case 1:
             /* Handle Request */
-            GxStats.attempts[reqtype-1]++;
-            it = req.find(reqtype);
+            s6bStats.attempts[msgType]++;
+            it = req.find(msgType);
             if(it != req.end())
             {
                 tmp =it->second;
             }
 
             tmp[pkt.getHopIdentifier()] = pkt.getTimestamp();
-            req[reqtype] = tmp;
+            req[msgType] = tmp;
             break;
 
         case 0:
             /* Handle Response */
-            it =  req.find(reqtype);
+            it =  req.find(msgType);
             if(it != req.end())
             {
                 tmp =it->second;
@@ -59,25 +55,25 @@ int GxInterface::addPkt(Diameter &pkt)
             it1 = tmp.find(pkt.getHopIdentifier());
             if(it1 == tmp.end())
             {
-                GxStats.unKnwRes[reqtype-1]++;
+                s6bStats.unKnwRes[msgType]++;
             }
             else
             {
                 if(pkt.getResCode() < 3000 || pkt.getResCode() == 70001)
                 {
-                    GxStats.succCount[reqtype-1]++;
+                    s6bStats.succCount[msgType]++;
                 }
                 else
                 {
-                    GxStats.failCount[reqtype-1]++;
+                    s6bStats.failCount[msgType]++;
                 }
 
-                GxStats.latency[reqtype-1] = ((GxStats.latency[reqtype-1])*(GxStats.latencySize[reqtype-1]) + (pkt.getTimestamp()-(it1->second)) / (++GxStats.latencySize[reqtype-1]));
+                s6bStats.latency[msgType] = ((s6bStats.latency[msgType])*(s6bStats.latencySize[msgType]) + (pkt.getTimestamp()-(it1->second)) / (++s6bStats.latencySize[msgType]));
             }
 
             /* Delete the request from map */
             tmp.erase(pkt.getHopIdentifier()); 
-            req[reqtype] = tmp;
+            req[msgType] = tmp;
             break;
 
         default:
@@ -86,7 +82,7 @@ int GxInterface::addPkt(Diameter &pkt)
     return 0;
 }
 
-void GxInterface::printStats()
+void S6BInterface::printStats()
 {
     char TimeBuf[300];
     time_t curT = startTime;
@@ -101,23 +97,20 @@ void GxInterface::printStats()
         switch(i)
         {
             case 0:
-                msgType = "INITIAL";
+                msgType = "AA";
                 break;
             case 1:
-                msgType = "UPDATE";
-                break;
-            case 2:
                 msgType = "TERMINATE";
                 break;
         }
 
-        std::cout << "splunk " << curTime << " DIAMETER " << "Interface=" << "Gx"                    << " "
+        std::cout << "splunk " << curTime << " DIAMETER " << "Interface=" << "S6B"                   << " "
                                                           << "Type="      << msgType                 << " "
-                                                          << "Attempts="  << GxStats.attempts[i]     << " "
-                                                          << "Success="   << GxStats.succCount[i]    << " " 
-                                                          << "Fail="      << GxStats.failCount[i]    << " " 
-                                                          << "Timeout="   << GxStats.timeoutCount[i] << " " 
-                                                          << "Latency="   << GxStats.latency[i]      << std::endl;
+                                                          << "Attempts=" << s6bStats.attempts[i]     << " "
+                                                          << "Success="  << s6bStats.succCount[i]    << " " 
+                                                          << "Fail="     << s6bStats.failCount[i]    << " " 
+                                                          << "Timeout="  << s6bStats.timeoutCount[i] << " " 
+                                                          << "Latency="  << s6bStats.latency[i]      << std::endl;
     }
 
     /*
@@ -148,9 +141,9 @@ void GxInterface::printStats()
     */
 }
 
-void GxInterface::clearStats()
+void S6BInterface::clearStats()
 {
-    memset(&GxStats,0,sizeof(CCGxStats));
+    memset(&s6bStats,0,sizeof(s6bStats));
     std::map<unsigned int, std::map<uint32_t, unsigned int> >::iterator it;
     std::map<uint32_t, unsigned int>::iterator it1;
     std::map<uint32_t, unsigned int> tmp;
@@ -163,7 +156,7 @@ void GxInterface::clearStats()
         {
             if(it1->second + DIAMETER_TIMEOUT < endTime)
             {
-                GxStats.timeoutCount[reqtype-1]++;
+                s6bStats.timeoutCount[reqtype]++;
                 tmp.erase(it1->first); 
             }
         }

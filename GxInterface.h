@@ -10,7 +10,7 @@
 #include "Diameter.h"
 #include "Interface.h"
 
-struct CCReqStats
+struct CCGxStats
 {
        unsigned int attempts[3];
        unsigned int succCount[3];
@@ -24,17 +24,10 @@ struct CCReqStats
 class GxInterface:public Interface
 {
      private:
-       CCReqStats GxStats;
+       CCGxStats GxStats;
 
      public:
        std::map<unsigned int, std::map<uint32_t, unsigned int> > req;
-
-       void incrementAttempts(int reqType);
-       void incrementSuccCount(int reqType);
-       void incrementFailCount(int reqType);
-       void incrementTimeoutCount(int reqType);
-       void incrementUnKnwResCount(int reqType);
-       void updateLatency(double newLat, int reqType);
        int addPkt(Diameter &pkt);
        void printStats();
        void clearStats();

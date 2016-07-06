@@ -65,15 +65,6 @@ DWORD extractDword(char* buffer, int startWord, int startBit, int len)
 
 Diameter::Diameter(char *dMsg)
 {
- char timeBuf  [256]; 
- struct timeval tv;
- struct timezone tz;
- struct tm *tm;
- gettimeofday(&tv, &tz);
- tm=localtime(&tv.tv_sec);
- sprintf (timeBuf, "%02d:%02d:%02d:%03ld",tm->tm_hour, tm->tm_min, tm->tm_sec, (tv.tv_usec) );
- std::cout << "ABHINAY: time at start of parsing packet:" << timeBuf << std::endl;
-
     unsigned int  avpCode;
     unsigned int avpLength;
 
@@ -90,6 +81,10 @@ Diameter::Diameter(char *dMsg)
      {
          avpCode = extractDword(dMsg, avpStartWord, 0, 32);
          avpLength = extractDword(dMsg, avpStartWord + 2, 8, 24);
+
+         if(avpLength <= 0)
+             break;
+
          switch (avpCode)
          {
              case 264:
@@ -124,10 +119,6 @@ Diameter::Diameter(char *dMsg)
     {
        request = 0;
     }
- gettimeofday(&tv, &tz);
- tm=localtime(&tv.tv_sec);
- sprintf (timeBuf, "%02d:%02d:%02d:%03ld",tm->tm_hour, tm->tm_min, tm->tm_sec, (tv.tv_usec) );
- std::cout << "ABHINAY: time at end of parsing packet:" << timeBuf << std::endl;
 }
 
 
