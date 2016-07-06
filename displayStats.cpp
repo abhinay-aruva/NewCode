@@ -32,8 +32,8 @@ static protocolTCP *tcpStats = NULL;
         int starttime = 0;
         int pktlen =  trace_get_wire_length(pkt);
         int ipSize =0; 
-        memcpy(ether_shost, trace_get_source_mac(pkt),6);
-        memcpy(ether_dhost,trace_get_destination_mac(pkt), 6);
+        //memcpy(ether_shost, trace_get_source_mac(pkt),6);
+        //memcpy(ether_dhost,trace_get_destination_mac(pkt), 6);
 
        	libtrace_ip_t *ip = NULL;
 	libtrace_ip6_t *ip6 = NULL;
@@ -55,7 +55,6 @@ static protocolTCP *tcpStats = NULL;
             break;
             case TRACE_ETHERTYPE_IPV6:
 		ip6 = (libtrace_ip6_t *)ltheader;
-                return -1; //ABHINAY remove this return
             break;
             default:
 		return -1;
@@ -67,15 +66,16 @@ static protocolTCP *tcpStats = NULL;
 	return -1;
         //Time of packet trace_get_seconds
         starttime = trace_get_seconds(pkt);
-       
- 
-        if(ppkt == NULL)
-            ppkt = new m_Packet;
+        //std::cout << "ABHINAY:: seconds is :" << seconds << std::endl;
 
-        //Fill Ethernet details
-        memcpy(ppkt->ethernetlayer.ether_dhost,ether_dhost,6);
-        memcpy(ppkt->ethernetlayer.ether_shost , ether_shost,6);
+        if(ppkt == NULL)
+        {
+            ppkt = new m_Packet;
+        }
  
+        //Fill Ethernet details
+        //memcpy(ppkt->ethernetlayer.ether_dhost,ether_dhost,6);
+        //memcpy(ppkt->ethernetlayer.ether_shost , ether_shost,6);
         ppkt->ethernetlayer.ether_type = ethertype; 
 		
              if(ppkt == NULL)
@@ -106,11 +106,16 @@ static protocolTCP *tcpStats = NULL;
              ppkt->timeStamp = starttime;
              
              ppkt->type = (libtrace_ipproto_t)proto;
+
+             ppkt->srcPort = trace_get_source_port(pkt);
+             ppkt->dstPort = trace_get_destination_port(pkt);
       
         switch(proto)
         {
             void *transport  ;
+            char *payload;
             char *tcp_payload;
+            char *sctp_payload;
             char *udp_payload;
             case TRACE_IPPROTO_TCP:
                //Fill Layer4/5 details
@@ -120,11 +125,12 @@ static protocolTCP *tcpStats = NULL;
                tcp = (libtrace_tcp_t *)ltheader;
                //transport = trace_get_transport(
 
-               tcp_payload = (char *)trace_get_payload_from_tcp(tcp,&rem);
+               payload = (char *)trace_get_payload_from_tcp(tcp,&rem);
 
-               if(tcp_payload && rem != 0)
-               //memcpy (ppkt->pay_load, tcp_payload, sizeof(ppkt->pay_load));
-            break;
+               if(payload && rem != 0)
+                   ppkt->pay_load = payload;
+
+               break;
             case TRACE_IPPROTO_UDP:
                 //Fill Layer4/5 details
                 ppkt->udp = *((libtrace_udp_t *)ltheader);
@@ -136,8 +142,11 @@ static protocolTCP *tcpStats = NULL;
                 udp_payload = (char *)trace_get_payload_from_udp(udp,&rem);
 
                 if(udp_payload && rem != 0) 
-                //memcpy (ppkt->pay_load, udp_payload, sizeof(ppkt->pay_load));
+                    ppkt->pay_load = payload;
             break;
+            case TRACE_IPPROTO_SCTP:
+                break; 
+
             default:
 	        return -1; // Support for other protocols can be extended..
             break;
