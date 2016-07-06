@@ -11,7 +11,7 @@ const WORD word_masks[]   = { 0x0000, 0x0001, 0x0003, 0x0007, 0x000F,
                               0x01FF, 0x03FF, 0x07FF, 0x0FFF,
                               0x1FFF, 0x3FFF, 0x7FFF, 0xFFFF };
 
-DWORD extractDword(char* buffer, int startWord, int startBit, int len)
+inline DWORD extractDword(char* buffer, int startWord, int startBit, int len)
 {
    DWORD value = 0, value1 = 0;
 
