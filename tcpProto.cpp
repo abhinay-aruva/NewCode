@@ -1,8 +1,14 @@
 #include "tcpProto.h"
-
+#include "Interface.h"
+#include "GxInterface.h"
+#include <time.h>
 
 int protocolTCP::addPkt(libtrace_packet_t *pkt, m_Packet *tcppkt)
 {
+ char timeBuf  [256]; 
+ struct timeval tv;
+ struct timezone tz;
+ struct tm *tm;
  //DownLink flag can be set here to tcppkt
      m_totalpkts++;
      m_totaldata+=tcppkt->getDataLen();
@@ -40,7 +46,33 @@ int protocolTCP::addPkt(libtrace_packet_t *pkt, m_Packet *tcppkt)
      //layerSeven.processPkt(pkt, *tcppkt);  //ABHINAY
      //m_pkt.push_back(tcppkt);
      
- // Add session logic
+     // Add session logic
+     if(tcppkt->srcPort == 3868 || tcppkt->dstPort == 3868)
+     {
+         Diameter dPkt(tcppkt->pay_load);
+         dPkt.setTimeStamp(tcppkt->timeStamp);
+         //dPkt.printPkt();
+         static Interface *interface;
+         if(interface == NULL)
+         {
+             interface = new GxInterface;
+         }
+
+         switch(interface->checkTime(dPkt.getTimestamp()))
+         {
+             case 0:
+                 break;
+             case 1:
+                 interface->addPkt(dPkt);
+                 break;
+             case 2:
+                 interface->printStats();
+                 interface->clearStats();
+                 interface->addPkt(dPkt);
+                 break;
+         }
+
+     }
 }
 
 int protocolTCP::addSession(libtrace_packet_t *pkt,m_Packet tcppkt)

@@ -8,6 +8,8 @@
 //#include "libtrace.h"
 #include "libtrace_parallel.h"
 #include "packetCmm.h"
+#include "Diameter.h"
+#include "Interface.h"
 
 typedef struct tcpSession{
 
@@ -63,6 +65,7 @@ public:
    int addSession(libtrace_packet_t *pkt,m_Packet tcppkt);
    int getPercUplink();
    int getPercDownLink();
+   Interface* getInterface(Diameter dPkt);
 };
 
 #endif //TCP_PROTO_H

@@ -1,0 +1,45 @@
+#ifndef GXINTERFACE_BASE_H
+#define GXINTERFACE_BASE_H
+
+#include <iostream>
+#include <string>
+#include <string.h>
+#include <map>
+#include <stdio.h>
+#include "libtrace_parallel.h"
+#include "Diameter.h"
+#include "Interface.h"
+
+struct CCReqStats
+{
+       unsigned int attempts[3];
+       unsigned int succCount[3];
+       unsigned int failCount[3];
+       unsigned int timeoutCount[3];
+       unsigned int unKnwRes[3];
+       unsigned int latencySize[3];
+       double latency[3];
+};
+
+class GxInterface:public Interface
+{
+     private:
+       CCReqStats GxStats;
+
+     public:
+       std::map<unsigned int, std::map<uint32_t, unsigned int> > req;
+
+       void incrementAttempts(int reqType);
+       void incrementSuccCount(int reqType);
+       void incrementFailCount(int reqType);
+       void incrementTimeoutCount(int reqType);
+       void incrementUnKnwResCount(int reqType);
+       void updateLatency(double newLat, int reqType);
+       int addPkt(Diameter &pkt);
+       void printStats();
+       void clearStats();
+
+       GxInterface();
+};
+
+#endif
