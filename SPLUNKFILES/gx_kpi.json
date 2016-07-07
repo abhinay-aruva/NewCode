@@ -1,0 +1,306 @@
+{
+    "modelName": "gx_kpi",
+    "displayName": "gx_kpi",
+    "description": "",
+    "objectSummary": {
+        "Event-Based": 1,
+        "Transaction-Based": 0,
+        "Search-Based": 0
+    },
+    "objects": [
+        {
+            "objectName": "EventObject",
+            "displayName": "Event Object",
+            "parentName": "BaseEvent",
+            "fields": [
+                {
+                    "fieldName": "TYPE",
+                    "owner": "EventObject",
+                    "type": "string",
+                    "fieldSearch": "",
+                    "required": false,
+                    "multivalue": false,
+                    "hidden": false,
+                    "editable": true,
+                    "displayName": "TYPE",
+                    "comment": ""
+                },
+                {
+                    "fieldName": "attempts",
+                    "owner": "EventObject",
+                    "type": "number",
+                    "fieldSearch": "",
+                    "required": false,
+                    "multivalue": false,
+                    "hidden": false,
+                    "editable": true,
+                    "displayName": "attempts",
+                    "comment": ""
+                },
+                {
+                    "fieldName": "date_hour",
+                    "owner": "EventObject",
+                    "type": "number",
+                    "fieldSearch": "",
+                    "required": false,
+                    "multivalue": false,
+                    "hidden": false,
+                    "editable": true,
+                    "displayName": "date_hour",
+                    "comment": ""
+                },
+                {
+                    "fieldName": "date_mday",
+                    "owner": "EventObject",
+                    "type": "number",
+                    "fieldSearch": "",
+                    "required": false,
+                    "multivalue": false,
+                    "hidden": false,
+                    "editable": true,
+                    "displayName": "date_mday",
+                    "comment": ""
+                },
+                {
+                    "fieldName": "date_minute",
+                    "owner": "EventObject",
+                    "type": "number",
+                    "fieldSearch": "",
+                    "required": false,
+                    "multivalue": false,
+                    "hidden": false,
+                    "editable": true,
+                    "displayName": "date_minute",
+                    "comment": ""
+                },
+                {
+                    "fieldName": "date_month",
+                    "owner": "EventObject",
+                    "type": "string",
+                    "fieldSearch": "",
+                    "required": false,
+                    "multivalue": false,
+                    "hidden": false,
+                    "editable": true,
+                    "displayName": "date_month",
+                    "comment": ""
+                },
+                {
+                    "fieldName": "date_second",
+                    "owner": "EventObject",
+                    "type": "number",
+                    "fieldSearch": "",
+                    "required": false,
+                    "multivalue": false,
+                    "hidden": false,
+                    "editable": true,
+                    "displayName": "date_second",
+                    "comment": ""
+                },
+                {
+                    "fieldName": "date_wday",
+                    "owner": "EventObject",
+                    "type": "string",
+                    "fieldSearch": "",
+                    "required": false,
+                    "multivalue": false,
+                    "hidden": false,
+                    "editable": true,
+                    "displayName": "date_wday",
+                    "comment": ""
+                },
+                {
+                    "fieldName": "date_year",
+                    "owner": "EventObject",
+                    "type": "number",
+                    "fieldSearch": "",
+                    "required": false,
+                    "multivalue": false,
+                    "hidden": false,
+                    "editable": true,
+                    "displayName": "date_year",
+                    "comment": ""
+                },
+                {
+                    "fieldName": "date_zone",
+                    "owner": "EventObject",
+                    "type": "string",
+                    "fieldSearch": "",
+                    "required": false,
+                    "multivalue": false,
+                    "hidden": false,
+                    "editable": true,
+                    "displayName": "date_zone",
+                    "comment": ""
+                },
+                {
+                    "fieldName": "host",
+                    "owner": "EventObject",
+                    "type": "string",
+                    "fieldSearch": "",
+                    "required": false,
+                    "multivalue": false,
+                    "hidden": false,
+                    "editable": true,
+                    "displayName": "host",
+                    "comment": ""
+                },
+                {
+                    "fieldName": "index",
+                    "owner": "EventObject",
+                    "type": "string",
+                    "fieldSearch": "",
+                    "required": false,
+                    "multivalue": false,
+                    "hidden": false,
+                    "editable": true,
+                    "displayName": "index",
+                    "comment": ""
+                },
+                {
+                    "fieldName": "latency",
+                    "owner": "EventObject",
+                    "type": "number",
+                    "fieldSearch": "",
+                    "required": false,
+                    "multivalue": false,
+                    "hidden": false,
+                    "editable": true,
+                    "displayName": "latency",
+                    "comment": ""
+                },
+                {
+                    "fieldName": "linecount",
+                    "owner": "EventObject",
+                    "type": "number",
+                    "fieldSearch": "",
+                    "required": false,
+                    "multivalue": false,
+                    "hidden": false,
+                    "editable": true,
+                    "displayName": "linecount",
+                    "comment": ""
+                },
+                {
+                    "fieldName": "metric",
+                    "owner": "EventObject",
+                    "type": "number",
+                    "fieldSearch": "",
+                    "required": false,
+                    "multivalue": false,
+                    "hidden": false,
+                    "editable": true,
+                    "displayName": "metric",
+                    "comment": ""
+                },
+                {
+                    "fieldName": "punct",
+                    "owner": "EventObject",
+                    "type": "string",
+                    "fieldSearch": "",
+                    "required": false,
+                    "multivalue": false,
+                    "hidden": false,
+                    "editable": true,
+                    "displayName": "punct",
+                    "comment": ""
+                },
+                {
+                    "fieldName": "result",
+                    "owner": "EventObject",
+                    "type": "string",
+                    "fieldSearch": "",
+                    "required": false,
+                    "multivalue": false,
+                    "hidden": false,
+                    "editable": true,
+                    "displayName": "result",
+                    "comment": ""
+                },
+                {
+                    "fieldName": "source",
+                    "owner": "EventObject",
+                    "type": "string",
+                    "fieldSearch": "",
+                    "required": false,
+                    "multivalue": false,
+                    "hidden": false,
+                    "editable": true,
+                    "displayName": "source",
+                    "comment": ""
+                },
+                {
+                    "fieldName": "sourcetype",
+                    "owner": "EventObject",
+                    "type": "string",
+                    "fieldSearch": "",
+                    "required": false,
+                    "multivalue": false,
+                    "hidden": false,
+                    "editable": true,
+                    "displayName": "sourcetype",
+                    "comment": ""
+                },
+                {
+                    "fieldName": "splunk_server",
+                    "owner": "EventObject",
+                    "type": "string",
+                    "fieldSearch": "",
+                    "required": false,
+                    "multivalue": false,
+                    "hidden": false,
+                    "editable": true,
+                    "displayName": "splunk_server",
+                    "comment": ""
+                },
+                {
+                    "fieldName": "timeendpos",
+                    "owner": "EventObject",
+                    "type": "number",
+                    "fieldSearch": "",
+                    "required": false,
+                    "multivalue": false,
+                    "hidden": false,
+                    "editable": true,
+                    "displayName": "timeendpos",
+                    "comment": ""
+                },
+                {
+                    "fieldName": "timestartpos",
+                    "owner": "EventObject",
+                    "type": "number",
+                    "fieldSearch": "",
+                    "required": false,
+                    "multivalue": false,
+                    "hidden": false,
+                    "editable": true,
+                    "displayName": "timestartpos",
+                    "comment": ""
+                },
+                {
+                    "fieldName": "_time",
+                    "owner": "EventObject",
+                    "type": "timestamp",
+                    "fieldSearch": "",
+                    "required": false,
+                    "multivalue": false,
+                    "hidden": false,
+                    "editable": true,
+                    "displayName": "_time",
+                    "comment": ""
+                }
+            ],
+            "calculations": [],
+            "constraints": [
+                {
+                    "search": "splunk diameter sourcetype=\"diameter_gx_latest\"",
+                    "owner": "EventObject"
+                }
+            ],
+            "lineage": "EventObject"
+        }
+    ],
+    "objectNameList": [
+        "EventObject"
+    ]
+}

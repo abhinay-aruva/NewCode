@@ -1,0 +1,94 @@
+<dashboard>
+  <label>GX:KPI Values</label>
+  <row>
+    <panel>
+      <table>
+        <title>Attempts</title>
+        <search>
+          <query>| pivot gx_attempts1 EventObject sum(attempts) AS "attempts" SPLITROW _time AS _time PERIOD second SPLITCOL TYPE SORT 100 _time ROWSUMMARY 0 COLSUMMARY 0 NUMCOLS 5 SHOWOTHER 1</query>
+          <earliest>1467722460</earliest>
+          <latest>1467722539</latest>
+        </search>
+      </table>
+    </panel>
+  
+    <panel>
+      <table>
+        <title>Avg Latency(ms)</title>
+        <search>
+          <query>| pivot gx_latency EventObject avg(latency) AS "Average of latency" SPLITROW _time AS _time PERIOD auto SPLITCOL TYPE SORT 100 _time ROWSUMMARY 0 COLSUMMARY 0 NUMCOLS 5 SHOWOTHER 1</query>
+          <earliest>1467722460</earliest>
+          <latest>1467722539</latest>
+        </search>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <title>Success</title>
+        <search>
+          <query>| pivot gx_failure EventObject avg(success) AS "Success" SPLITROW _time AS _time PERIOD second SPLITCOL TYPE SORT 100 _time ROWSUMMARY 0 COLSUMMARY 0 NUMCOLS 5 SHOWOTHER 0</query>
+          <earliest>1467722460</earliest>
+          <latest>1467722539</latest>
+        </search>
+      </table>
+    </panel>
+ 
+    <panel>
+      <table>
+        <title>Failure</title>
+        <search>
+          <query>| pivot gx_failure EventObject avg(fail) AS "Failure" SPLITROW _time AS _time PERIOD second SPLITCOL TYPE SORT 100 _time ROWSUMMARY 0 COLSUMMARY 0 NUMCOLS 5 SHOWOTHER 0</query>
+          <earliest>1467722460</earliest>
+          <latest>1467722539</latest>
+        </search>
+      </table>
+    </panel>
+  
+    <panel>
+      <table>
+        <title>TimeOut</title>
+        <search>
+          <query>| pivot gx_failure EventObject avg(timeout) AS "TimeOut" SPLITROW _time AS _time PERIOD second SPLITCOL TYPE SORT 100 _time ROWSUMMARY 0 COLSUMMARY 0 NUMCOLS 5 SHOWOTHER 0</query>
+          <earliest>1467722460</earliest>
+          <latest>1467722539</latest>
+        </search>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <title>Success rate(%)</title>
+        <search>
+          <query>| pivot gx_rate SearchObject avg(s_perc) AS "Percentage" SPLITROW _time AS _time PERIOD auto SPLITCOL TYPE SORT 100 _time ROWSUMMARY 0 COLSUMMARY 0 NUMCOLS 5 SHOWOTHER 0</query>
+          <earliest>1467722460</earliest>
+          <latest>1467722539</latest>
+        </search>
+      </table>
+    </panel>
+  
+    <panel>
+      <table>
+        <title>Failure rate(%)</title>
+        <search>
+          <query>| pivot gx_rate SearchObject avg(s_fail) AS "Percentage" SPLITROW _time AS _time PERIOD auto SPLITCOL TYPE SORT 100 _time ROWSUMMARY 0 COLSUMMARY 0 NUMCOLS 5 SHOWOTHER 0</query>
+          <earliest>1467722460</earliest>
+          <latest>1467722539</latest>
+        </search>
+      </table>
+    </panel>
+ 
+    <panel>
+      <table>
+        <title>Timeout rate(%)</title>
+        <search>
+          <query>| pivot gx_rate SearchObject avg(s_timeout) AS "Percentage" SPLITROW _time AS _time PERIOD auto SPLITCOL TYPE SORT 100 _time ROWSUMMARY 0 COLSUMMARY 0 NUMCOLS 5 SHOWOTHER 0</query>
+          <earliest>1467722460</earliest>
+          <latest>1467722539</latest>
+        </search>
+      </table>
+    </panel>
+  </row>
+</dashboard>
