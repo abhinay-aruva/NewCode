@@ -106,6 +106,14 @@ void* readPcapFile(void* fileName)
 	 * as long as the return value is greater than zero
 	 */
         
+ char timeBuf  [256]; 
+ struct timeval tv;
+ struct timezone tz;
+ struct tm *tm;
+ gettimeofday(&tv, &tz);
+ tm=localtime(&tv.tv_sec);
+ sprintf (timeBuf, "%02d:%02d:%02d:%03ld",tm->tm_hour, tm->tm_min, tm->tm_sec, (tv.tv_usec) );
+ std::cout << "ABHINAY: time at start of analyzing packet:" << timeBuf << std::endl;
 	while (trace_read_packet(trace,packet)>0) {
 		/* Call our per_packet function for every packet */
 		per_packet(packet);
@@ -157,6 +165,7 @@ void* readPcapFile(void* fileName)
            logger << "Error executing the tcpbinary cmd:" << tcptraceCMD << std::endl;
 */
 
+/*
         int ret = pthread_self();
         for(int c =0 ; c < MAX_THREAD ; c++)
         {  
@@ -164,6 +173,7 @@ void* readPcapFile(void* fileName)
             threads[c] = 0 ;         
         }
         pthread_exit(&ret);
+*/
 }
 
 bool isPcapfileReady(string fileName)
