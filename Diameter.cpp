@@ -11,7 +11,7 @@ const WORD word_masks[]   = { 0x0000, 0x0001, 0x0003, 0x0007, 0x000F,
                               0x01FF, 0x03FF, 0x07FF, 0x0FFF,
                               0x1FFF, 0x3FFF, 0x7FFF, 0xFFFF };
 
-inline DWORD extractDword(char* buffer, int startWord, int startBit, int len)
+DWORD extractDword(char* buffer, int startWord, int startBit, int len)
 {
    DWORD value = 0, value1 = 0;
 
@@ -69,31 +69,52 @@ Diameter::Diameter(char *dMsg)
     unsigned int avpLength;
     bool resCodeAvp=false, CCReqAvp=false;
 
-    msgLength = extractDword(dMsg, 0, 8, 24);
-    commandFlag = extractDword(dMsg, 2, 0, 8);
     cc = extractDword(dMsg, 2, 8, 24);
     appId = extractDword(dMsg, 4, 0, 32);
-    hopIdentifier = extractDword(dMsg, 6, 0, 32);
 
-    request = commandFlag & 0x80;
-    if(request)
+    switch(appId)
     {
-       request = 1;
+        case GX:
+            break;
+
+        case GY:
+            break;
+
+        case S6B:
+            break;
+
+        default:
+            return;
     }
-    else
+
+    switch(cc)
     {
-       request = 0;
+        case CCRorA:
+            break;
+
+        case S6BAA:
+            break;
+
+        case S6BTERMINATE:
+            break;
+
+        default:
+            return;
     }
+    
+    msgLength = extractDword(dMsg, 0, 8, 24);
+    commandFlag = extractDword(dMsg, 2, 0, 8);
+    hopIdentifier = extractDword(dMsg, 6, 0, 32);
 
     int msgRemaining = msgLength - 20;
     int avpStartWord = 10;
 
      while(msgRemaining > 0)
-     {
+     { 
          avpCode = extractDword(dMsg, avpStartWord, 0, 32);
          avpLength = extractDword(dMsg, avpStartWord + 2, 8, 24);
 
-         if(avpLength <= 0)
+         if(avpLength <= 0 || avpLength > 5014)
              break;
 
          switch (avpCode)
@@ -132,6 +153,15 @@ Diameter::Diameter(char *dMsg)
          avpStartWord += (avpLength+roundoff)/2;
      }
 
+     request = commandFlag & 0x80;
+    if(request)
+    {
+       request = 1;
+    }
+    else
+    {
+       request = 0;
+    }
 }
 
 
