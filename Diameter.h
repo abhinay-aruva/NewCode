@@ -56,45 +56,45 @@ class Diameter
         unsigned int timeStamp;
 
    public:
-        Diameter(char *dMsg);
+        Diameter(char* Msg);
         void printPkt();
 
-        void setTimeStamp(unsigned int time)
+        inline void setTimeStamp(unsigned int time)
         {
             timeStamp = time;
         }
 
-        unsigned int getCC()
+        inline unsigned int getCC()
         {
             return cc;
         }
 
-        uint8_t getRequest()
+        inline uint8_t getRequest()
         {
             return request;
         }
 
-        uint32_t getHopIdentifier()
+        inline uint32_t getHopIdentifier()
         {
             return hopIdentifier;
         }
 
-        unsigned int getReqType()
+        inline unsigned int getReqType()
         {
             return reqType;
         }
 
-        unsigned int getTimestamp()
+        inline unsigned int getTimestamp()
         {
             return timeStamp;
         }
 
-        unsigned int getResCode()
+        inline unsigned int getResCode()
         {
             return resCode;
         }
 
-        unsigned int getAppid()
+        inline unsigned int getAppid()
         {
             return appId;
         }

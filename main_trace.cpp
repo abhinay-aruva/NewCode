@@ -25,6 +25,7 @@ using namespace std;
 #define MAX_THREAD 20
 string pcapFileEndStr = "ready.pcap";
 string fileNo;
+string logFileName="";
 
 
 std::ofstream logger("pcapanal.log");
@@ -230,6 +231,7 @@ int parse_args(int argc, char **argv)
                    if(logger)
                     logger.close(); 
 
+                   logFileName = optarg;
                    logger.open(optarg, std::ofstream::out | std::ofstream::app);
                    if (logger.fail()) {
                    cerr << "open failure as expected: " << strerror(errno) << '\n';
@@ -244,7 +246,20 @@ int parse_args(int argc, char **argv)
  
               case 'i':
                  fileNo = optarg;
-                 pcapFileEndStr = "ready_" + fileNo + ".pcap";
+                 pcapFileEndStr = "_" + fileNo  + "ready" + ".pcap";
+                 if(logFileName.size() == 0)
+                 {
+                     if(logger)
+                         logger.close();
+
+                     logFileName = "pcapanal_" + fileNo + ".log";
+                     logger.open(logFileName.c_str(), std::ofstream::out | std::ofstream::app);
+                     if (logger.fail())
+                     {
+                         cerr << "open failure as expected: " << strerror(errno) << '\n';
+                         return -1;
+                     }
+                 }
                  break;
  
               default: 
