@@ -7,7 +7,6 @@ APP_OBJS = tcpProto.o\
 	   udpProto.o\
 	   lteGtp.o\
 	   displayStats.o\
-	   hostDpi.o \
 	   Diameter.o \
            GxInterface.o \
            GyInterface.o \
@@ -21,7 +20,7 @@ APP_OBJS = tcpProto.o\
 
 #CPPFLAGS 
 #LIBPATH  = -L /usr/local/lib/
-NDPIINC = -I /usr/local/include/libndpi-1.8.0/libndpi/
+#NDPIINC = -I /usr/local/include/libndpi-1.7.1/libndpi/
 LIBFLAGS =  -lpthread  -lrt -ltrace -DUSER_TCP_UDP
 #LIBFLAGS =  -lpthread  -lrt -ltrace
 NDPILIB = -lndpi
@@ -33,7 +32,7 @@ NDPILIB = -lndpi
 	 .cpp
 
 %.o:%.cpp
-	$(CXX) $(CPPFLAGS) $(NDPIINC)  $(LIBFLAGS) -g -c $^  
+	$(CXX) $(CPPFLAGS)  $(LIBFLAGS) -g -c $^  
 
 
 .PHONY:
@@ -44,10 +43,10 @@ all: $(APPNAME) $(APPTCPTRACE)
 	
  
 $(APPNAME): $(APP_OBJS) 
-	$(CXX) -g main.cpp  -o $@ $(CPPFLAGS) $(NDPIINC) $(LIBPATH) $(LIBFLAGS)  $(APP_OBJS) $(NDPILIB)
+	$(CXX) -g main.cpp  -o $@ $(CPPFLAGS)  $(LIBPATH) $(LIBFLAGS)  $(APP_OBJS) $(NDPILIB)
 
 $(APPTCPTRACE): $(APP_OBJS)
-	$(CXX) -g main_trace.cpp -o $@ $(CPPFLAGS) $(NDPIINC) $(LIBPATH) $(LIBFLAGS)  $(APP_OBJS) $(NDPILIB) 
+	$(CXX) -g main_trace.cpp -o $@ $(CPPFLAGS)  $(LIBPATH) $(LIBFLAGS)  $(APP_OBJS) $(NDPILIB) 
 	
 clean:
 	-rm -f *.o  $(APPNAME) $(APPTCPTRACE)

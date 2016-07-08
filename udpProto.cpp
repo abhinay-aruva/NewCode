@@ -113,7 +113,7 @@ void protocolUDP::displaymetrics(std::string splunkkey) {
      getLteDash()->printstats(splunkkey);
 
    // Applayer info
-      layerSeven.printStat(splunkkey);    
+      //layerSeven.printStat(splunkkey);    
 }
 
 

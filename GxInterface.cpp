@@ -11,8 +11,8 @@ GxInterface::GxInterface()
 
 int GxInterface::addPkt(Diameter &pkt)
 {
-    std::cout << "ABHINAY:: Got a new packet. Printing Gx stats before adding packet." << std::endl;
-    printStats();
+    //std::cout << "ABHINAY:: Got a new packet. Printing Gx stats before adding packet." << std::endl;
+    //printStats();
     std::map<unsigned int, std::map<uint32_t, unsigned int> >::iterator it;
     std::map<uint32_t, unsigned int>::iterator it1;
     std::map<uint32_t, unsigned int> tmp;
@@ -85,8 +85,8 @@ int GxInterface::addPkt(Diameter &pkt)
         default:
             return 1;
     }
-    std::cout << "ABHINAY:: Got a new packet. Printing Gx stats after adding packet." << std::endl;
-    printStats();
+    //std::cout << "ABHINAY:: Got a new packet. Printing Gx stats after adding packet." << std::endl;
+    //printStats();
     return 0;
 }
 

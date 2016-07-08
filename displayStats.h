@@ -36,7 +36,7 @@ class displayStats{
 
   std::map<uint32_t, std::map<uint32_t, protocolBase* > >::iterator it1;
   std::map<uint32_t, protocolBase* >::iterator it2;
-  std::map<uint32_t, std::map<uint32_t, protocolBase *> > *tmp = NULL; 
+  std::map<uint32_t, std::map<uint32_t, protocolBase *> > *tmp; 
 
   Displaylayer layer;  
   
