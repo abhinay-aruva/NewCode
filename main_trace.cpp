@@ -15,11 +15,17 @@
 #include "displayStats.h"
 #include "libtrace_parallel.h"
 #include <stdlib.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <syscall.h>
+#include <sstream>
 using namespace std;
 
 #define DIRPATH "/apps/opt/LIBTRACE/test/"
 #define MAX_THREAD 20
-const string pcapFileEndStr = "ready.pcap";
+string pcapFileEndStr = "ready.pcap";
+string fileNo;
+
 
 std::ofstream logger("pcapanal.log");
 pthread_t threads[MAX_THREAD];
@@ -28,6 +34,24 @@ std::string protcolname[20];
 //uint64_t count = 0;
 //Dpi
 extern string _protoFilePath;
+
+bool SetThreadAttributes(int m_readeraffinity)
+{
+    if ( -1 == m_readeraffinity)
+       return false; // Default thread behaviour
+
+    int readtid = syscall(__NR_gettid);//syscall.h to get the pid associated with thread
+    pthread_t thread = pthread_self();
+    cpu_set_t csmask;
+    CPU_ZERO(&csmask);
+    CPU_SET(m_readeraffinity, &csmask);
+    
+    if ( pthread_setaffinity_np(thread, sizeof(cpu_set_t), &csmask) != 0 )
+    {
+        std::cerr << "Reader error on thread set cpu \n";
+        return false;
+    }
+}
 
 static void per_packet(libtrace_packet_t *packet)
 {
@@ -72,18 +96,6 @@ void* readPcapFile(void* fileName)
 	 * that we're going to read from the trace */
 	packet = trace_create_packet();
 
-	if (packet == NULL)
-        {
-		/* Unfortunately, trace_create_packet doesn't use the libtrace
-		 * error system. This is because libtrace errors are associated
-		 * with the trace structure, not the packet. In our case, we
-		 * haven't even created a trace at this point so we can't 
-		 * really expect libtrace to set an error on it for us, can
-		 * we?
-		 */
-		perror("Creating libtrace packet");
-		libtrace_cleanup(trace, packet);
-	}
 
 	/* Opening and starting the input trace, as per createdemo.c */
 	trace = trace_create(filePath.c_str());
@@ -99,6 +111,18 @@ void* readPcapFile(void* fileName)
 		libtrace_cleanup(trace, packet);
 	}
 
+	if (packet == NULL)
+        {
+		/* Unfortunately, trace_create_packet doesn't use the libtrace
+		 * error system. This is because libtrace errors are associated
+		 * with the trace structure, not the packet. In our case, we
+		 * haven't even created a trace at this point so we can't 
+		 * really expect libtrace to set an error on it for us, can
+		 * we?
+		 */
+		perror("Creating libtrace packet");
+		libtrace_cleanup(trace, packet);
+	}
 	/* This loop will read packets from the trace until either EOF is
 	 * reached or an error occurs (hopefully the former!)
 	 *
@@ -113,7 +137,7 @@ void* readPcapFile(void* fileName)
  gettimeofday(&tv, &tz);
  tm=localtime(&tv.tv_sec);
  sprintf (timeBuf, "%02d:%02d:%02d:%03ld",tm->tm_hour, tm->tm_min, tm->tm_sec, (tv.tv_usec) );
- std::cout << "ABHINAY: time at start of analyzing packet:" << timeBuf << std::endl;
+ //std::cout << "ABHINAY: time at start of analyzing packet:" << timeBuf << std::endl;
 	while (trace_read_packet(trace,packet)>0) {
 		/* Call our per_packet function for every packet */
 		per_packet(packet);
@@ -135,8 +159,8 @@ void* readPcapFile(void* fileName)
 	 */
 	if (trace_is_err(trace)) {
 		trace_perror(trace,"Reading packets");
-		libtrace_cleanup(trace, packet);
 	}
+		libtrace_cleanup(trace, packet);
 
 	/* We've reached the end of our trace without an error so we can
 	 * print our final count. Note the use of the PRIu64 format which is
@@ -190,14 +214,16 @@ bool isPcapfileReady(string fileName)
 
 void usage()
 {
-  cerr << "PCAP_ANALY \n" 
-       << "	-l: log name\n" ; 
+  cerr << "PCAP_ANALY_TCPT \n" 
+       << "	-l: log name\n" 
+       << "	-c: core number\n" ; 
 }
 int parse_args(int argc, char **argv)
 {
 
     int option;
-     while ((option = getopt(argc, argv,"l:")) != -1)
+    int core = -1;
+     while ((option = getopt(argc, argv,"l:c:i:")) != -1)
     {
       switch (option) {
               case 'l' : 
@@ -211,10 +237,30 @@ int parse_args(int argc, char **argv)
                    }
 
               break;
-              default : 
-              usage(); 
-              return -1; 
+
+              case 'c' :
+                 core = atoi(optarg);
+                 break;
+ 
+              case 'i':
+                 fileNo = optarg;
+                 pcapFileEndStr = "ready_" + fileNo + ".pcap";
+                 break;
+ 
+              default: 
+                  usage(); 
+                  return -1; 
              }    
+    }
+
+    if(core == -1)
+    {
+        std::cout << "ABHINAY: core is not set" << std::endl;
+        usage();
+    }
+    else
+    {
+        SetThreadAttributes(core);
     }
 }
 
