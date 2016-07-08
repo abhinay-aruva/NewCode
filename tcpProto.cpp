@@ -51,13 +51,13 @@ int protocolTCP::addPkt(libtrace_packet_t *pkt, m_Packet *tcppkt)
      if(tcppkt->srcPort == 3868 || tcppkt->dstPort == 3868)
      {
          Diameter dPkt(tcppkt->pay_load);
-         dPkt.setTimeStamp(tcppkt->timeStamp);
+         dPkt.timeStamp = tcppkt->timeStamp;
          //dPkt.printPkt();
          Interface *interface = getInterface(dPkt);
          if(interface == NULL)
              return -1;
 
-         switch(interface->checkTime(dPkt.getTimestamp()))
+         switch(interface->checkTime(dPkt.timeStamp))
          {
              case 0:
                  break;
@@ -76,7 +76,7 @@ int protocolTCP::addPkt(libtrace_packet_t *pkt, m_Packet *tcppkt)
 
 Interface* protocolTCP::getInterface(Diameter dPkt)
 {
-    switch(dPkt.getAppid())
+    switch(dPkt.appId)
     {
         case GX:
             if(gxInterface == NULL)
@@ -172,7 +172,7 @@ void protocolTCP::displaymetrics(std::string splunkkey) {
                 << (m_totaluplink ) << " Total_DoLink=" << (m_totaldownlink) << 
                  " Ipv4=" << m_totalipv4 << " Ipv6=" << m_totalip6 << std::endl;
 
-  layerSeven.printStat(splunkkey);
+  //layerSeven.printStat(splunkkey);
 }
 
 int protocolTCP::getPercUplink(){}
