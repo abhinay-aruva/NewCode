@@ -226,7 +226,7 @@ int parse_args(int argc, char **argv)
 {
 
     int option;
-    int core = -1;
+    int core = 0;
      while ((option = getopt(argc, argv,"l:c:i:")) != -1)
     {
       switch (option) {

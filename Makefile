@@ -32,7 +32,7 @@ NDPILIB = -lndpi
 	 .cpp
 
 %.o:%.cpp
-	$(CXX) $(CPPFLAGS)  $(LIBFLAGS) -g -c $^  
+	$(CXX) -std=c++0x $(CPPFLAGS)  $(LIBFLAGS) -g -c $^  
 
 
 .PHONY:
@@ -43,10 +43,10 @@ all: $(APPNAME) $(APPTCPTRACE)
 	
  
 $(APPNAME): $(APP_OBJS) 
-	$(CXX) -g main.cpp  -o $@ $(CPPFLAGS)  $(LIBPATH) $(LIBFLAGS)  $(APP_OBJS) $(NDPILIB)
+	$(CXX) -g main.cpp  -std=c++0x -o $@ $(CPPFLAGS)  $(LIBPATH) $(LIBFLAGS)  $(APP_OBJS) $(NDPILIB)
 
 $(APPTCPTRACE): $(APP_OBJS)
-	$(CXX) -g main_trace.cpp -o $@ $(CPPFLAGS)  $(LIBPATH) $(LIBFLAGS)  $(APP_OBJS) $(NDPILIB) 
+	$(CXX) -g main_trace.cpp  -std=c++0x -o $@ $(CPPFLAGS)  $(LIBPATH) $(LIBFLAGS)  $(APP_OBJS) $(NDPILIB) 
 	
 clean:
 	-rm -f *.o  $(APPNAME) $(APPTCPTRACE)
