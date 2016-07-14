@@ -28,7 +28,7 @@ class GxInterface:public Interface
 
        /* Local variables */
        char TimeBuf[300];
-       time_t curT = startTime;
+       time_t curT;
        struct tm * curTimeInfo;
        unsigned int reqtype;
 

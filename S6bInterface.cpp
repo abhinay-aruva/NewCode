@@ -55,6 +55,7 @@ int S6BInterface::addPkt(Diameter &pkt)
 
 void S6BInterface::printStats(std::string &node)
 {
+    curT = startTime;
     static int RTTCount;
     /* Calculate latency */
     it=res.begin();
@@ -150,7 +151,7 @@ void S6BInterface::printStats(std::string &node)
        std::cout << curTime << " Ip=" << node <<   " Ix=" << "S6B"                    << " "
                                                           << "Ty="      << msgType                 << " "
                                                           << "Kp=Laty"
-                                                          << " Kpv=" <<  (float)s6bStats.latency[i] << std::endl; 
+                                                          << " Kpv=" << (int) (s6bStats.latency[i]*1000) << std::endl; 
     }
 }
 

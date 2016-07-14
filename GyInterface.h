@@ -29,7 +29,7 @@ class GyInterface:public Interface
        /* Local Variables */
        unsigned int reqtype;
        char TimeBuf[300];
-       time_t curT = startTime;
+       time_t curT;
        struct tm * curTimeInfo;
 
      public:

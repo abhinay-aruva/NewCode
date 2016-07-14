@@ -61,6 +61,7 @@ int GyInterface::addPkt(Diameter &pkt)
 
 void GyInterface::printStats(std::string &node)
 {
+    curT = startTime;
     static int RTTCount;
     /* Calculate latency */
     it=res.begin();
@@ -162,7 +163,7 @@ void GyInterface::printStats(std::string &node)
        std::cout << curTime << " Ip=" << node <<   " Ix=" << "Gy"                    << " "
                                                           << "Ty="      << msgType                 << " "
                                                           << "Kp=Laty"
-                                                          << " Kpv=" <<  GyStats.latency[i-1] << std::endl; 
+                                                          << " Kpv=" << (int) (GyStats.latency[i-1]*1000) << std::endl; 
     }
 
 }

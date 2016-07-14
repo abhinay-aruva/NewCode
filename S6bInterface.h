@@ -35,7 +35,7 @@ class S6BInterface:public Interface
 
        /* Local variables */
        char TimeBuf[300];
-       time_t curT = startTime;
+       time_t curT;
        struct tm * curTimeInfo;
        MSGType msgType;  
 

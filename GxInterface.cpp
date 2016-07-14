@@ -61,6 +61,7 @@ int GxInterface::addPkt(Diameter &pkt)
 
 void GxInterface::printStats(std::string &node)
 {
+    curT = startTime;
     static int RTTCount;
     // Calculate latency 
     it=res.begin();
@@ -159,7 +160,7 @@ void GxInterface::printStats(std::string &node)
        std::cout << curTime << " Ip=" << node <<   " Ix=" << "Gx"                    << " "
                                                           << "Ty="      << msgType                 << " "
                                                           << "Kp=Laty"
-                                                          << " Kpv=" <<  GxStats.latency[i-1] << std::endl; 
+                                                          << " Kpv=" <<  (int)(GxStats.latency[i-1] * 1000)<< std::endl; 
     }
 }
 
