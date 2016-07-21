@@ -145,10 +145,13 @@ void S6BInterface::printStats(std::string &node)
                                                           << "Kp=Tout"
                                                           << " Kpv="   << s6bStats.timeoutCount[i] << " " << std::endl;
 
-       std::cout << curTime << " " << node <<   " Ix=" << "S6B"                    << " "
+       if(s6bStats.latencySize[i] > 0)
+       {
+          std::cout << curTime << " " << node <<   " Ix=" << "S6B"                    << " "
                                                           << "Ty="      << msgType                 << " "
                                                           << "Kp=Laty"
                                                           << " Kpv=" << (int) ((s6bStats.latency[i]/s6bStats.latencySize[i])*1000) << std::endl; 
+       }
     }
 }
 

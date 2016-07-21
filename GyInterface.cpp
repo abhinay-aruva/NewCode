@@ -160,10 +160,13 @@ void GyInterface::printStats(std::string &node)
                                                           << "Kp=Tout"
                                                           << " Kpv="   << GyStats.timeoutCount[i-1] << " " << std::endl;
 
-       std::cout << curTime << " " << node <<   " Ix=" << "Gy"                    << " "
+       if(GyStats.latencySize[i-1] > 0)
+       {
+          std::cout << curTime << " " << node <<   " Ix=" << "Gy"                    << " "
                                                           << "Ty="      << msgType                 << " "
                                                           << "Kp=Laty"
                                                           << " Kpv=" << (int) ((GyStats.latency[i-1]/GyStats.latencySize[i-1])*1000) << std::endl; 
+       }
     }
 
 }

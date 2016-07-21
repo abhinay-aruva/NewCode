@@ -153,10 +153,13 @@ void GxInterface::printStats(std::string &node)
                                                           << " Kpv="      << GxStats.timeoutCount[i-1]    << " " << std::endl;
 
 
-       std::cout << curTime << " " << node <<   " Ix=" << "Gx"                    << " "
-                                                          << "Ty="      << msgType                 << " "
-                                                          << "Kp=Laty"
-                                                          << " Kpv=" <<  (int)((GxStats.latency[i-1]/GxStats.latencySize[i-1]) * 1000)<< std::endl; 
+       if(GxStats.latencySize[i-1] > 0)
+       {
+           std::cout << curTime << " " << node <<   " Ix=" << "Gx"                    << " "
+                                                           << "Ty="      << msgType                 << " "
+                                                           << "Kp=Laty"
+                                                           << " Kpv=" <<  (int)((GxStats.latency[i-1]/GxStats.latencySize[i-1]) * 1000)<< std::endl;
+       }
     }
 }
 
