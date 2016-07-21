@@ -26,6 +26,9 @@ class GyInterface:public Interface
 {
      private:
        CCGyStats GyStats;
+       double TS;
+       int uid;
+       double RTT;
 
        /* Local Variables */
        unsigned int reqtype;
@@ -36,6 +39,9 @@ class GyInterface:public Interface
      public:
        std::unordered_map<unsigned int, std::unordered_map<uint32_t, long long int> > req;
        std::unordered_map<unsigned int, std::unordered_map<uint32_t, double> > res;
+
+       std::unordered_map<uint32_t, long long int> tmp; 
+       std::unordered_map<uint32_t, long long int>::iterator it; 
 
        int addPkt(Diameter &pkt);
        //void printStats();

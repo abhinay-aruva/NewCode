@@ -26,6 +26,9 @@ class GxInterface:public Interface
 {
      private:
        CCGxStats GxStats;
+       double TS;
+       int uid;
+       double RTT;
 
        /* Local variables */
        char TimeBuf[300];
@@ -36,7 +39,10 @@ class GxInterface:public Interface
      public:
        std::unordered_map<unsigned int, std::unordered_map<uint32_t, long long int> > req;
        std::unordered_map<unsigned int, std::unordered_map<uint32_t, double> > res;
-       
+
+       std::unordered_map<uint32_t, long long int> tmp; 
+       std::unordered_map<uint32_t, long long int>::iterator it; 
+
        int addPkt(Diameter &pkt);
        void printStats(std::string &node);
        void clearStats();

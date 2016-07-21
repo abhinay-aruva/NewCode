@@ -1,141 +1,401 @@
 diff --git a/GxInterface.cpp b/GxInterface.cpp
-index b0d8bcf..86f75b4 100644
+index fc7ce65..f85e6ed 100644
 --- a/GxInterface.cpp
 +++ b/GxInterface.cpp
-@@ -61,6 +61,7 @@ int GxInterface::addPkt(Diameter &pkt)
- 
- void GxInterface::printStats(std::string &node)
- {
-+    curT = startTime;
-     static int RTTCount;
-     // Calculate latency 
-     it=res.begin();
-@@ -159,7 +160,7 @@ void GxInterface::printStats(std::string &node)
-        std::cout << curTime << " Ip=" << node <<   " Ix=" << "Gx"                    << " "
-                                                           << "Ty="      << msgType                 << " "
-                                                           << "Kp=Laty"
--                                                          << " Kpv=" <<  GxStats.latency[i-1] << std::endl; 
-+                                                          << " Kpv=" <<  (int)(GxStats.latency[i-1] * 1000)<< std::endl; 
-     }
+@@ -8,15 +8,14 @@ GxInterface::GxInterface(std::string &nodepair)
+     startTime = 0;
+     endTime   = 0;
+     reqtype   = 0;
++    TS        = 0;
++    uid       = 0;
++    RTT       = 0;
+     initialiseShf(nodepair);
  }
  
+ int GxInterface::addPkt(Diameter &pkt)
+ {
+-    static int uid    = 0;
+-    static double RTT = 0;
+-    static double TS  = 0; 
+-
+     if(pkt.cc != CCRorA)
+     {
+         return 1;
+@@ -74,6 +73,7 @@ int GxInterface::addPkt(Diameter &pkt)
+                 {
+                     TS=atof(shf_val);
+                     shfrql->DelUidVal(uid);
++                    req[reqtype].erase(pkt.hopIdentifier);
+                 }
+             }
+           
+@@ -120,6 +120,21 @@ void GxInterface::printStats(std::string &node)
+ 
+     for(int i=INITIAL; i<= TERMINATE; i++)
+     {
++        tmp = req[i];
++        for(it = tmp.begin(); it != tmp.end(); it++)
++        {
++            if(shfrql->GetUidValCopy(it->second))
++            {
++                TS=atof(shf_val);
++                if((endTime-TS) > DIAMETER_TIMEOUT)
++                {
++                    GxStats.timeoutCount[i-1]++;
++                    shfrql->DelUidVal(it->second);
++                    req[i].erase(it->first);
++                }
++            }
++        }
++
+         std::string msgType;
+         switch(i)
+         {
+@@ -166,6 +181,6 @@ void GxInterface::printStats(std::string &node)
+ void GxInterface::clearStats()
+ {
+     memset(&GxStats,0,sizeof(CCGxStats));
+-    req.clear();
++    //req.clear();
+     res.clear();
+ }
 diff --git a/GxInterface.h b/GxInterface.h
-index 40ce63b..e0476a5 100644
+index 6d7758a..abba2b3 100644
 --- a/GxInterface.h
 +++ b/GxInterface.h
-@@ -28,7 +28,7 @@ class GxInterface:public Interface
+@@ -26,6 +26,9 @@ class GxInterface:public Interface
+ {
+      private:
+        CCGxStats GxStats;
++       double TS;
++       int uid;
++       double RTT;
  
         /* Local variables */
         char TimeBuf[300];
--       time_t curT = startTime;
-+       time_t curT;
-        struct tm * curTimeInfo;
-        unsigned int reqtype;
- 
+@@ -36,7 +39,10 @@ class GxInterface:public Interface
+      public:
+        std::unordered_map<unsigned int, std::unordered_map<uint32_t, long long int> > req;
+        std::unordered_map<unsigned int, std::unordered_map<uint32_t, double> > res;
+-       
++
++       std::unordered_map<uint32_t, long long int> tmp; 
++       std::unordered_map<uint32_t, long long int>::iterator it; 
++
+        int addPkt(Diameter &pkt);
+        void printStats(std::string &node);
+        void clearStats();
 diff --git a/GyInterface.cpp b/GyInterface.cpp
-index de81ac9..a432f06 100644
+index 2258404..341cb86 100644
 --- a/GyInterface.cpp
 +++ b/GyInterface.cpp
-@@ -61,6 +61,7 @@ int GyInterface::addPkt(Diameter &pkt)
+@@ -9,14 +9,14 @@ GyInterface::GyInterface(std::string &nodepair)
+     startTime = 0;
+     endTime   = 0;
+     reqtype   = 0;
++    TS        = 0;
++    uid       = 0;
++    RTT       = 0;
+     initialiseShf(nodepair);
+ }
  
- void GyInterface::printStats(std::string &node)
+ int GyInterface::addPkt(Diameter &pkt)
  {
-+    curT = startTime;
-     static int RTTCount;
-     /* Calculate latency */
-     it=res.begin();
-@@ -162,7 +163,7 @@ void GyInterface::printStats(std::string &node)
-        std::cout << curTime << " Ip=" << node <<   " Ix=" << "Gy"                    << " "
-                                                           << "Ty="      << msgType                 << " "
-                                                           << "Kp=Laty"
--                                                          << " Kpv=" <<  GyStats.latency[i-1] << std::endl; 
-+                                                          << " Kpv=" << (int) (GyStats.latency[i-1]*1000) << std::endl; 
-     }
+-    static int uid    = 0;
+-    static double RTT = 0;
+-    static double TS  = 0; 
  
+     if(pkt.cc != CCRorA)
+     {
+@@ -77,6 +77,7 @@ int GyInterface::addPkt(Diameter &pkt)
+                 {
+                     TS=atof(shf_val);
+                     shfrql->DelUidVal(uid);
++                    req[reqtype].erase(pkt.hopIdentifier);
+                 }
+              }
+ 
+@@ -124,6 +125,21 @@ void GyInterface::printStats(std::string &node)
+ 
+     for(int i=INITIAL; i<=EVENT; i++)
+     {
++        tmp = req[i];
++        for(it = tmp.begin(); it != tmp.end(); it++)
++        {
++            if(shfrql->GetUidValCopy(it->second))
++            {
++                TS=atof(shf_val);
++                if((endTime-TS) > DIAMETER_TIMEOUT)
++                {
++                    GyStats.timeoutCount[i-1]++;
++                    shfrql->DelUidVal(it->second);
++                    req[i].erase(it->first);
++                }
++            }
++        }
++
+         std::string msgType;
+         switch(i)
+         {
+@@ -174,6 +190,6 @@ void GyInterface::printStats(std::string &node)
+ void GyInterface::clearStats()
+ {
+     memset(&GyStats,0,sizeof(CCGyStats));
+-    req.clear();
++    //req.clear();
+     res.clear();
  }
 diff --git a/GyInterface.h b/GyInterface.h
-index b6d30e8..4f5e79c 100644
+index 87671ef..3a313fe 100644
 --- a/GyInterface.h
 +++ b/GyInterface.h
-@@ -29,7 +29,7 @@ class GyInterface:public Interface
+@@ -26,6 +26,9 @@ class GyInterface:public Interface
+ {
+      private:
+        CCGyStats GyStats;
++       double TS;
++       int uid;
++       double RTT;
+ 
         /* Local Variables */
         unsigned int reqtype;
-        char TimeBuf[300];
--       time_t curT = startTime;
-+       time_t curT;
-        struct tm * curTimeInfo;
+@@ -37,6 +40,9 @@ class GyInterface:public Interface
+        std::unordered_map<unsigned int, std::unordered_map<uint32_t, long long int> > req;
+        std::unordered_map<unsigned int, std::unordered_map<uint32_t, double> > res;
  
-      public:
++       std::unordered_map<uint32_t, long long int> tmp; 
++       std::unordered_map<uint32_t, long long int>::iterator it; 
++
+        int addPkt(Diameter &pkt);
+        //void printStats();
+        void printStats(std::string &node);
 diff --git a/S6bInterface.cpp b/S6bInterface.cpp
-index 05c1efe..a2fa87d 100644
+index 627a1e5..2c09a2b 100644
 --- a/S6bInterface.cpp
 +++ b/S6bInterface.cpp
-@@ -55,6 +55,7 @@ int S6BInterface::addPkt(Diameter &pkt)
- 
- void S6BInterface::printStats(std::string &node)
- {
-+    curT = startTime;
-     static int RTTCount;
-     /* Calculate latency */
-     it=res.begin();
-@@ -150,7 +151,7 @@ void S6BInterface::printStats(std::string &node)
-        std::cout << curTime << " Ip=" << node <<   " Ix=" << "S6B"                    << " "
-                                                           << "Ty="      << msgType                 << " "
-                                                           << "Kp=Laty"
--                                                          << " Kpv=" <<  (float)s6bStats.latency[i] << std::endl; 
-+                                                          << " Kpv=" << (int) (s6bStats.latency[i]*1000) << std::endl; 
-     }
+@@ -8,14 +8,14 @@ S6BInterface::S6BInterface(std::string &nodepair)
+     memset(&s6bStats,0,sizeof(s6bStats));
+     startTime = 0;
+     endTime   = 0;
++    TS        = 0;
++    uid       = 0;
++    RTT       = 0;
+     initialiseShf(nodepair);
  }
  
+ int S6BInterface::addPkt(Diameter &pkt)
+ {
+-    static int uid    = 0;
+-    static double RTT = 0;
+-    static double TS  = 0; 
+     msgType = DEFAULT;  
+ 
+     switch(pkt.cc)
+@@ -69,6 +69,7 @@ int S6BInterface::addPkt(Diameter &pkt)
+                 {
+                     TS=atof(shf_val);
+                     shfrql->DelUidVal(uid);
++                    req[msgType].erase(pkt.hopIdentifier);
+                 }
+             }
+ 
+@@ -115,6 +116,21 @@ void S6BInterface::printStats(std::string &node)
+ 
+     for(int i=AA; i<= TERM; i++)
+     {
++        tmp = req[i];
++        for(it = tmp.begin(); it != tmp.end(); it++)
++        {
++            if(shfrql->GetUidValCopy(it->second))
++            {
++                TS=atof(shf_val);
++                if((endTime-TS) > DIAMETER_TIMEOUT)
++                {
++                    s6bStats.timeoutCount[i-1]++;
++                    shfrql->DelUidVal(it->second);
++                    req[i].erase(it->first);
++                }
++            }
++        }
++
+         std::string msgType;
+         switch(i)
+         {
+@@ -158,6 +174,6 @@ void S6BInterface::printStats(std::string &node)
+ void S6BInterface::clearStats()
+ {
+     memset(&s6bStats,0,sizeof(s6bStats));
+-    req.clear();
++    //req.clear();
+     res.clear();
+ }
 diff --git a/S6bInterface.h b/S6bInterface.h
-index 74eac98..26f9e91 100644
+index 4d52569..15e5532 100644
 --- a/S6bInterface.h
 +++ b/S6bInterface.h
-@@ -35,7 +35,7 @@ class S6BInterface:public Interface
+@@ -33,6 +33,9 @@ class S6BInterface:public Interface
+ {
+      private:
+        S6BStats s6bStats;
++       double TS;
++       int uid;
++       double RTT;
  
         /* Local variables */
         char TimeBuf[300];
--       time_t curT = startTime;
-+       time_t curT;
-        struct tm * curTimeInfo;
-        MSGType msgType;  
- 
-diff --git a/tcpProto.cpp b/tcpProto.cpp
-index 6b0d90b..019c055 100644
---- a/tcpProto.cpp
-+++ b/tcpProto.cpp
-@@ -103,7 +103,9 @@ int protocolTCP::addPkt(libtrace_packet_t *pkt, m_Packet *tcppkt)
-                  interface->addPkt(dPkt);
-                  break;
-          }
-+         //interface->printStats(node);
-      }
-+                 
-      
- }
- 
+@@ -44,6 +47,9 @@ class S6BInterface:public Interface
+        std::unordered_map<unsigned int, std::unordered_map<uint32_t, long long int> > req;
+        std::unordered_map<unsigned int, std::unordered_map<uint32_t, double> > res;
+        
++       std::unordered_map<uint32_t, long long int> tmp; 
++       std::unordered_map<uint32_t, long long int>::iterator it; 
++
+        int addPkt(Diameter &pkt);
+        //void printStats();
+        void printStats(std::string &node);
 diff --git a/tmp b/tmp
-index 5cbaf77..bc5bff8 100644
+index ceebf3f..4ef8eff 100644
 --- a/tmp
 +++ b/tmp
-@@ -1,20 +0,0 @@
--diff --git a/displayStats.cpp b/displayStats.cpp
--index 458f0a6..560fcbc 100644
----- a/displayStats.cpp
--+++ b/displayStats.cpp
--@@ -69,9 +69,13 @@ static protocolTCP *tcpStats = NULL;
--         starttime = trace_get_seconds(pkt);
--        
--  
--+        if(ppkt == NULL)
--+            ppkt = new m_Packet;
--+
--         //Fill Ethernet details
---        //memcpy(ppkt->ethernetlayer.ether_dhost,ether_dhost,6);
---        //memcpy(ppkt->ethernetlayer.ether_shost , ether_shost,6);
--+        memcpy(ppkt->ethernetlayer.ether_dhost,ether_dhost,6);
--+        memcpy(ppkt->ethernetlayer.ether_shost , ether_shost,6);
--+ 
--         ppkt->ethernetlayer.ether_type = ethertype; 
-- 		
--              if(ppkt == NULL)
+@@ -1,141 +0,0 @@
+-diff --git a/GxInterface.cpp b/GxInterface.cpp
+-index b0d8bcf..86f75b4 100644
+---- a/GxInterface.cpp
+-+++ b/GxInterface.cpp
+-@@ -61,6 +61,7 @@ int GxInterface::addPkt(Diameter &pkt)
+- 
+- void GxInterface::printStats(std::string &node)
+- {
+-+    curT = startTime;
+-     static int RTTCount;
+-     // Calculate latency 
+-     it=res.begin();
+-@@ -159,7 +160,7 @@ void GxInterface::printStats(std::string &node)
+-        std::cout << curTime << " Ip=" << node <<   " Ix=" << "Gx"                    << " "
+-                                                           << "Ty="      << msgType                 << " "
+-                                                           << "Kp=Laty"
+--                                                          << " Kpv=" <<  GxStats.latency[i-1] << std::endl; 
+-+                                                          << " Kpv=" <<  (int)(GxStats.latency[i-1] * 1000)<< std::endl; 
+-     }
+- }
+- 
+-diff --git a/GxInterface.h b/GxInterface.h
+-index 40ce63b..e0476a5 100644
+---- a/GxInterface.h
+-+++ b/GxInterface.h
+-@@ -28,7 +28,7 @@ class GxInterface:public Interface
+- 
+-        /* Local variables */
+-        char TimeBuf[300];
+--       time_t curT = startTime;
+-+       time_t curT;
+-        struct tm * curTimeInfo;
+-        unsigned int reqtype;
+- 
+-diff --git a/GyInterface.cpp b/GyInterface.cpp
+-index de81ac9..a432f06 100644
+---- a/GyInterface.cpp
+-+++ b/GyInterface.cpp
+-@@ -61,6 +61,7 @@ int GyInterface::addPkt(Diameter &pkt)
+- 
+- void GyInterface::printStats(std::string &node)
+- {
+-+    curT = startTime;
+-     static int RTTCount;
+-     /* Calculate latency */
+-     it=res.begin();
+-@@ -162,7 +163,7 @@ void GyInterface::printStats(std::string &node)
+-        std::cout << curTime << " Ip=" << node <<   " Ix=" << "Gy"                    << " "
+-                                                           << "Ty="      << msgType                 << " "
+-                                                           << "Kp=Laty"
+--                                                          << " Kpv=" <<  GyStats.latency[i-1] << std::endl; 
+-+                                                          << " Kpv=" << (int) (GyStats.latency[i-1]*1000) << std::endl; 
+-     }
+- 
+- }
+-diff --git a/GyInterface.h b/GyInterface.h
+-index b6d30e8..4f5e79c 100644
+---- a/GyInterface.h
+-+++ b/GyInterface.h
+-@@ -29,7 +29,7 @@ class GyInterface:public Interface
+-        /* Local Variables */
+-        unsigned int reqtype;
+-        char TimeBuf[300];
+--       time_t curT = startTime;
+-+       time_t curT;
+-        struct tm * curTimeInfo;
+- 
+-      public:
+-diff --git a/S6bInterface.cpp b/S6bInterface.cpp
+-index 05c1efe..a2fa87d 100644
+---- a/S6bInterface.cpp
+-+++ b/S6bInterface.cpp
+-@@ -55,6 +55,7 @@ int S6BInterface::addPkt(Diameter &pkt)
+- 
+- void S6BInterface::printStats(std::string &node)
+- {
+-+    curT = startTime;
+-     static int RTTCount;
+-     /* Calculate latency */
+-     it=res.begin();
+-@@ -150,7 +151,7 @@ void S6BInterface::printStats(std::string &node)
+-        std::cout << curTime << " Ip=" << node <<   " Ix=" << "S6B"                    << " "
+-                                                           << "Ty="      << msgType                 << " "
+-                                                           << "Kp=Laty"
+--                                                          << " Kpv=" <<  (float)s6bStats.latency[i] << std::endl; 
+-+                                                          << " Kpv=" << (int) (s6bStats.latency[i]*1000) << std::endl; 
+-     }
+- }
+- 
+-diff --git a/S6bInterface.h b/S6bInterface.h
+-index 74eac98..26f9e91 100644
+---- a/S6bInterface.h
+-+++ b/S6bInterface.h
+-@@ -35,7 +35,7 @@ class S6BInterface:public Interface
+- 
+-        /* Local variables */
+-        char TimeBuf[300];
+--       time_t curT = startTime;
+-+       time_t curT;
+-        struct tm * curTimeInfo;
+-        MSGType msgType;  
+- 
+-diff --git a/tcpProto.cpp b/tcpProto.cpp
+-index 6b0d90b..019c055 100644
+---- a/tcpProto.cpp
+-+++ b/tcpProto.cpp
+-@@ -103,7 +103,9 @@ int protocolTCP::addPkt(libtrace_packet_t *pkt, m_Packet *tcppkt)
+-                  interface->addPkt(dPkt);
+-                  break;
+-          }
+-+         //interface->printStats(node);
+-      }
+-+                 
+-      
+- }
+- 
+-diff --git a/tmp b/tmp
+-index 5cbaf77..bc5bff8 100644
+---- a/tmp
+-+++ b/tmp
+-@@ -1,20 +0,0 @@
+--diff --git a/displayStats.cpp b/displayStats.cpp
+--index 458f0a6..560fcbc 100644
+----- a/displayStats.cpp
+--+++ b/displayStats.cpp
+--@@ -69,9 +69,13 @@ static protocolTCP *tcpStats = NULL;
+--         starttime = trace_get_seconds(pkt);
+--        
+--  
+--+        if(ppkt == NULL)
+--+            ppkt = new m_Packet;
+--+
+--         //Fill Ethernet details
+---        //memcpy(ppkt->ethernetlayer.ether_dhost,ether_dhost,6);
+---        //memcpy(ppkt->ethernetlayer.ether_shost , ether_shost,6);
+--+        memcpy(ppkt->ethernetlayer.ether_dhost,ether_dhost,6);
+--+        memcpy(ppkt->ethernetlayer.ether_shost , ether_shost,6);
+--+ 
+--         ppkt->ethernetlayer.ether_type = ethertype; 
+-- 		
+--              if(ppkt == NULL)

@@ -8,14 +8,14 @@ S6BInterface::S6BInterface(std::string &nodepair)
     memset(&s6bStats,0,sizeof(s6bStats));
     startTime = 0;
     endTime   = 0;
+    TS        = 0;
+    uid       = 0;
+    RTT       = 0;
     initialiseShf(nodepair);
 }
 
 int S6BInterface::addPkt(Diameter &pkt)
 {
-    static int uid    = 0;
-    static double RTT = 0;
-    static double TS  = 0; 
     msgType = DEFAULT;  
 
     switch(pkt.cc)
@@ -69,6 +69,7 @@ int S6BInterface::addPkt(Diameter &pkt)
                 {
                     TS=atof(shf_val);
                     shfrql->DelUidVal(uid);
+                    req[msgType].erase(pkt.hopIdentifier);
                 }
             }
 
@@ -115,6 +116,21 @@ void S6BInterface::printStats(std::string &node)
 
     for(int i=AA; i<= TERM; i++)
     {
+        tmp = req[i];
+        for(it = tmp.begin(); it != tmp.end(); it++)
+        {
+            if(shfrql->GetUidValCopy(it->second))
+            {
+                TS=atof(shf_val);
+                if((endTime-TS) > DIAMETER_TIMEOUT)
+                {
+                    s6bStats.timeoutCount[i-1]++;
+                    shfrql->DelUidVal(it->second);
+                    req[i].erase(it->first);
+                }
+            }
+        }
+
         std::string msgType;
         switch(i)
         {
@@ -158,6 +174,6 @@ void S6BInterface::printStats(std::string &node)
 void S6BInterface::clearStats()
 {
     memset(&s6bStats,0,sizeof(s6bStats));
-    req.clear();
+    //req.clear();
     res.clear();
 }

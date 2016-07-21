@@ -8,15 +8,14 @@ GxInterface::GxInterface(std::string &nodepair)
     startTime = 0;
     endTime   = 0;
     reqtype   = 0;
+    TS        = 0;
+    uid       = 0;
+    RTT       = 0;
     initialiseShf(nodepair);
 }
 
 int GxInterface::addPkt(Diameter &pkt)
 {
-    static int uid    = 0;
-    static double RTT = 0;
-    static double TS  = 0; 
-
     if(pkt.cc != CCRorA)
     {
         return 1;
@@ -74,6 +73,7 @@ int GxInterface::addPkt(Diameter &pkt)
                 {
                     TS=atof(shf_val);
                     shfrql->DelUidVal(uid);
+                    req[reqtype].erase(pkt.hopIdentifier);
                 }
             }
           
@@ -120,6 +120,21 @@ void GxInterface::printStats(std::string &node)
 
     for(int i=INITIAL; i<= TERMINATE; i++)
     {
+        tmp = req[i];
+        for(it = tmp.begin(); it != tmp.end(); it++)
+        {
+            if(shfrql->GetUidValCopy(it->second))
+            {
+                TS=atof(shf_val);
+                if((endTime-TS) > DIAMETER_TIMEOUT)
+                {
+                    GxStats.timeoutCount[i-1]++;
+                    shfrql->DelUidVal(it->second);
+                    req[i].erase(it->first);
+                }
+            }
+        }
+
         std::string msgType;
         switch(i)
         {
@@ -166,6 +181,6 @@ void GxInterface::printStats(std::string &node)
 void GxInterface::clearStats()
 {
     memset(&GxStats,0,sizeof(CCGxStats));
-    req.clear();
+    //req.clear();
     res.clear();
 }

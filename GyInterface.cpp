@@ -9,14 +9,14 @@ GyInterface::GyInterface(std::string &nodepair)
     startTime = 0;
     endTime   = 0;
     reqtype   = 0;
+    TS        = 0;
+    uid       = 0;
+    RTT       = 0;
     initialiseShf(nodepair);
 }
 
 int GyInterface::addPkt(Diameter &pkt)
 {
-    static int uid    = 0;
-    static double RTT = 0;
-    static double TS  = 0; 
 
     if(pkt.cc != CCRorA)
     {
@@ -77,6 +77,7 @@ int GyInterface::addPkt(Diameter &pkt)
                 {
                     TS=atof(shf_val);
                     shfrql->DelUidVal(uid);
+                    req[reqtype].erase(pkt.hopIdentifier);
                 }
              }
 
@@ -124,6 +125,21 @@ void GyInterface::printStats(std::string &node)
 
     for(int i=INITIAL; i<=EVENT; i++)
     {
+        tmp = req[i];
+        for(it = tmp.begin(); it != tmp.end(); it++)
+        {
+            if(shfrql->GetUidValCopy(it->second))
+            {
+                TS=atof(shf_val);
+                if((endTime-TS) > DIAMETER_TIMEOUT)
+                {
+                    GyStats.timeoutCount[i-1]++;
+                    shfrql->DelUidVal(it->second);
+                    req[i].erase(it->first);
+                }
+            }
+        }
+
         std::string msgType;
         switch(i)
         {
@@ -174,6 +190,6 @@ void GyInterface::printStats(std::string &node)
 void GyInterface::clearStats()
 {
     memset(&GyStats,0,sizeof(CCGyStats));
-    req.clear();
+    //req.clear();
     res.clear();
 }

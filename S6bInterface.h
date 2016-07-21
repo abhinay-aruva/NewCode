@@ -33,6 +33,9 @@ class S6BInterface:public Interface
 {
      private:
        S6BStats s6bStats;
+       double TS;
+       int uid;
+       double RTT;
 
        /* Local variables */
        char TimeBuf[300];
@@ -44,6 +47,9 @@ class S6BInterface:public Interface
        std::unordered_map<unsigned int, std::unordered_map<uint32_t, long long int> > req;
        std::unordered_map<unsigned int, std::unordered_map<uint32_t, double> > res;
        
+       std::unordered_map<uint32_t, long long int> tmp; 
+       std::unordered_map<uint32_t, long long int>::iterator it; 
+
        int addPkt(Diameter &pkt);
        //void printStats();
        void printStats(std::string &node);
