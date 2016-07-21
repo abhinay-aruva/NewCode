@@ -13,6 +13,7 @@ GxInterface::GxInterface(std::string &nodepair)
 
 int GxInterface::addPkt(Diameter &pkt)
 {
+    std::cout << "ABHINAY:: Got a Gx packet" << std::endl;
     static int uid = 0;
     static double TS = 0; 
 
@@ -35,22 +36,29 @@ int GxInterface::addPkt(Diameter &pkt)
     }
 
             char buf[250];
+            std::cout <<  std::fixed << "ABHINAY:: Pkt Hop id is :" << pkt.hopIdentifier << std::endl;
             sprintf(buf,"%d",pkt.hopIdentifier);
+            std::cout <<  std::fixed << "ABHINAY:: Buf Hop id is :" << buf << std::endl;
             std::string key(buf);
-            sprintf(buf,"%d",pkt.timeStamp);
+            sprintf(buf,"%f",pkt.timeStamp);
             std::string keyV(buf);
+            std::cout <<  std::fixed << "ABHINAY:: Pkt time stamp is:" << pkt.timeStamp << std::endl;
+            std::cout << "ABHINAY:: Key time stamp is:" << keyV << std::endl;
             static int count = 0;
     switch(pkt.request)
     {
         case 1:
             /* Handle Request */
             shfrql->MakeHash(key.c_str(), key.length());
+            std::cout << "ABHINAY:: Got a request: hopid:" << pkt.hopIdentifier << " timestamp:" << keyV.c_str() << std::endl;
             req[reqtype][pkt.hopIdentifier] = shfrql->PutKeyVal(keyV.c_str(), keyV.length());
+            std::cout << "ABHINAY:: Uid inserted is: " << req[reqtype][pkt.hopIdentifier] << std::endl;
              
             break;
 
         case 0:
             /* Handle Response */
+            std::cout << "ABHINAY:: Got a response packet" << std::endl;
             uid = 0;
             TS  = 0; 
             bzero(shf_val,sizeof(shf_val));
@@ -61,6 +69,7 @@ int GxInterface::addPkt(Diameter &pkt)
                 if(!shfrql->GetKeyValCopy())
                 {
                     TS=atof(shf_val);
+                    shfrql->DelKeyVal();
                     std::cout << "TIme stamp from no UID of request is:" << TS << std::endl;
                 }
                 else
@@ -74,6 +83,7 @@ int GxInterface::addPkt(Diameter &pkt)
                 if(!shfrql->GetUidValCopy(uid))
                 {
                     TS=atof(shf_val);
+                    shfrql->DelUidVal(uid);
                     std::cout << "TIme stamp from UID of request is:" << TS << std::endl;
                 }
             }
@@ -98,6 +108,7 @@ int GxInterface::addPkt(Diameter &pkt)
 
 void GxInterface::printStats(std::string &node)
 {
+    /*
     curT = startTime;
     static int RTTCount;
     // Calculate latency 
@@ -133,7 +144,6 @@ void GxInterface::printStats(std::string &node)
         it++;
     }
 
-    /* Calculate Time out requests */
     reqIt = req.begin();
     while(reqIt != req.end())
     {
@@ -198,7 +208,7 @@ void GxInterface::printStats(std::string &node)
                                                           << "Ty="      << msgType                 << " "
                                                           << "Kp=Laty"
                                                           << " Kpv=" <<  (int)(GxStats.latency[i-1] * 1000000)<< std::endl; 
-    }
+    }*/
 }
 
 void GxInterface::clearStats()
