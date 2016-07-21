@@ -16,6 +16,7 @@ struct CCGyStats
        unsigned int succCount[4];
        unsigned int failCount[4];
        unsigned int timeoutCount[4];
+       unsigned int unPairResCnt[3];
        unsigned int unKnwRes[4];
        unsigned int latencySize[4];
        double latency[4];
@@ -33,24 +34,15 @@ class GyInterface:public Interface
        struct tm * curTimeInfo;
 
      public:
-       std::unordered_map<unsigned int, std::unordered_map<uint32_t, double> > req;
+       std::unordered_map<unsigned int, std::unordered_map<uint32_t, long long int> > req;
        std::unordered_map<unsigned int, std::unordered_map<uint32_t, double> > res;
-
-       /* Iterators for traversing req and res maps */
-       std::unordered_map<unsigned int, std::unordered_map<uint32_t, double> >::iterator it;
-       std::unordered_map<uint32_t, double>::iterator it1;
-       std::unordered_map<uint32_t, double> *tmp;
-
-       std::unordered_map<unsigned int, std::unordered_map<uint32_t, double> >::iterator reqIt;
-       std::unordered_map<uint32_t, double>::iterator reqIt1;
-       std::unordered_map<uint32_t, double> *reqTmp;
 
        int addPkt(Diameter &pkt);
        //void printStats();
        void printStats(std::string &node);
        void clearStats();
 
-       GyInterface();
+       GyInterface(std::string &nodepair);
 };
 
 #endif

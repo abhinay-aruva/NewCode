@@ -5,6 +5,7 @@
 #include "S6bInterface.h"
 #include <time.h>
 #include <unordered_map>
+#include <sstream>
 
 std::unordered_map <std::string, GxInterface  * > GxMap;
 std::unordered_map <std::string, GyInterface  * > GyMap;
@@ -98,6 +99,11 @@ int protocolTCP::addPkt(libtrace_packet_t *pkt, m_Packet *tcppkt)
                  interface->addPkt(dPkt);
                  break;
              case 2:
+                 std::string src, dst;
+                 std::stringstream split(node);
+                 getline(split, src, '-');
+                 getline(split, dst, '-');
+                 node = "sip=" + src + " dip=" + dst;
                  interface->printStats(node);
                  interface->clearStats();
                  interface->addPkt(dPkt);
@@ -122,19 +128,19 @@ Interface* protocolTCP::getInterface(Diameter dPkt, std::string &nodeip)
             //else
               if(!gxInterface)
                 {
-                gxInterface = new GxInterface; //gxInterface = my_map[nodeip];
+                gxInterface = new GxInterface(nodeip); //gxInterface = my_map[nodeip];
                 //std::cout << "Creating new node " << nodeip << std::endl; 
                 GxMap[nodeip] = gxInterface;
                 }
 //Distinct HOH TEST starts here
 	      static uint64_t reqHopid= 0;
-	      static uint64_t resHopid= 10000;
+	      static uint64_t resHopid= 100000;
 
-	      if(reqHopid == 10000)
+	      if(reqHopid == 100000)
 		      reqHopid = 0;
 
 	      if(resHopid == 0)
-		      resHopid = 10000;
+		      resHopid = 100000;
 
 	      if(dPkt.request)
 	      {
@@ -154,7 +160,7 @@ Interface* protocolTCP::getInterface(Diameter dPkt, std::string &nodeip)
             gyInterface = GyMap[nodeip];
             if(!gyInterface)
                 {
-                gyInterface = new GyInterface; //gxInterface = my_map[nodeip];
+                gyInterface = new GyInterface(nodeip); //gxInterface = my_map[nodeip];
                 GyMap[nodeip] = gyInterface;
                 }
           
@@ -185,7 +191,7 @@ Interface* protocolTCP::getInterface(Diameter dPkt, std::string &nodeip)
             s6bInterface = S6bMap[nodeip]; 
             if(!s6bInterface)
                 {
-                 s6bInterface = new S6BInterface; //gxInterface = my_map[nodeip];
+                 s6bInterface = new S6BInterface(nodeip); //gxInterface = my_map[nodeip];
                  S6bMap[nodeip] = s6bInterface;
                 }
 //Distinct HOH TEST starts here
