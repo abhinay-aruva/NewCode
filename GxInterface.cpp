@@ -2,16 +2,14 @@
 #include <unordered_map>
 #include <string>
 
-GxInterface::GxInterface(std::string &nodepair)
+GxInterface::GxInterface()
 {
     memset(&GxStats,0,sizeof(CCGxStats));
     startTime = 0;
     endTime   = 0;
     reqtype   = 0;
     TS        = 0;
-    uid       = 0;
-    RTT       = 0;
-    initialiseShf(nodepair);
+    RTT       = 0; 
 }
 
 int GxInterface::addPkt(Diameter &pkt)
@@ -34,50 +32,36 @@ int GxInterface::addPkt(Diameter &pkt)
            return 1;
     }
 
-    std::string key  = std::to_string(pkt.hopIdentifier);
-    std::string keyV =  std::to_string(pkt.timeStamp);
-
     switch(pkt.request)
     {
         case 1:
             /* Handle Request */
-            shfrql->MakeHash(key.c_str(), key.length());
-            req[reqtype][pkt.hopIdentifier] = shfrql->PutKeyVal(keyV.c_str(), keyV.length());
+            req[reqtype][pkt.hopIdentifier] = pkt.timeStamp;
             break;
 
         case 0:
-            /* Handle Response */
-            uid = 0;
-            TS  = 0;
-            RTT = 0;
-            bzero(shf_val,sizeof(shf_val));
 
-            uid = req[reqtype][pkt.hopIdentifier];
-            if(uid == 0)
+            /* Handle Response */
+            TS = req[reqtype][pkt.hopIdentifier];
+            if(TS == 0)
             {
-                shfrql->MakeHash(key.c_str(), key.length());
-                if(shfrql->GetKeyValCopy())
-                {
-                    TS=atof(shf_val);
-                    shfrql->DelKeyVal();
-                }
-                else
-                {
-                    res[reqtype][pkt.hopIdentifier] = pkt.timeStamp;
-                    return 0;
-                }
+                 GxStats.unKnwRes[reqtype-1]++;
+                 return 0;
             }
-            else
+
+            // Increment attempts if a req is found for res 
+            GxStats.attempts[reqtype-1]++;
+
+            // Calculate latency
+            RTT = pkt.timeStamp - TS;
+            if(RTT < 0 || RTT > 40)
             {
-                if(shfrql->GetUidValCopy(uid))
-                {
-                    TS=atof(shf_val);
-                    shfrql->DelUidVal(uid);
-                    req[reqtype].erase(pkt.hopIdentifier);
-                }
+                 GxStats.timeoutCount[reqtype-1]++;
+                 return 0;
             }
-          
-            // Sucess or failure stats 
+            GxStats.latency[reqtype-1] += RTT;
+            GxStats.latencySize[reqtype-1]++;
+
             if(pkt.resCode < 3000 || pkt.resCode == 70001)
             {
                 GxStats.succCount[reqtype-1]++;
@@ -86,22 +70,8 @@ int GxInterface::addPkt(Diameter &pkt)
             {
                 GxStats.failCount[reqtype-1]++;
             }
-            GxStats.attempts[reqtype-1]++;
 
-            // Latency stats
-            RTT = pkt.timeStamp - TS;
-            if(RTT > 40)
-            {
-               GxStats.timeoutCount[reqtype-1]++;
-               return 0;
-            }
-            else if(RTT < 0)
-            {
-               return 0;
-            }
-
-            GxStats.latency[reqtype-1] += RTT; 
-            GxStats.latencySize[reqtype-1]++;
+            req[reqtype].erase(pkt.hopIdentifier);
             break;
 
         default:
@@ -113,6 +83,29 @@ int GxInterface::addPkt(Diameter &pkt)
 void GxInterface::printStats(std::string &node)
 {
     curT = startTime;
+
+    /* Calculate Time out requests */
+    reqIt = req.begin();
+    while(reqIt != req.end())
+    {
+        reqTmp =&(reqIt->second);
+        reqIt1 = reqTmp->begin();
+        while(reqIt1 != reqTmp->end())
+        {
+            if(reqIt1->second + DIAMETER_TIMEOUT < endTime)
+            {
+                GxStats.timeoutCount[(reqIt->first)-1]++;
+                GxStats.attempts[(reqIt->first)-1]++;
+                reqTmp->erase(reqIt1++);
+            }
+            else
+            {
+                reqIt1++;
+            }
+        }
+        reqIt++;
+    }
+
     // Print Stats
     curTimeInfo = localtime(&curT);
     strftime(TimeBuf, 100, "%F  %T", curTimeInfo);
@@ -120,21 +113,6 @@ void GxInterface::printStats(std::string &node)
 
     for(int i=INITIAL; i<= TERMINATE; i++)
     {
-        tmp = req[i];
-        for(it = tmp.begin(); it != tmp.end(); it++)
-        {
-            if(shfrql->GetUidValCopy(it->second))
-            {
-                TS=atof(shf_val);
-                if((endTime-TS) > DIAMETER_TIMEOUT)
-                {
-                    GxStats.timeoutCount[i-1]++;
-                    shfrql->DelUidVal(it->second);
-                    req[i].erase(it->first);
-                }
-            }
-        }
-
         std::string msgType;
         switch(i)
         {
@@ -148,32 +126,31 @@ void GxInterface::printStats(std::string &node)
                 msgType = "TERMINATE";
                 break;
         }
-        std::cout << curTime << " " << node <<   " Ix=" << "Gx"                    << " "
+        std::cout << curTime << " Ip=" << node <<   " Ix=" << "Gx"                    << " "
                                                           << "Ty="      << msgType                 << " "
                                                           << "Kp=Att"  
                                                           << " Kpv=" << GxStats.attempts[i-1]     << std::endl;
 
-        std::cout << curTime << " " << node <<   " Ix=" << "Gx"                    << " "
+        std::cout << curTime << " Ip=" << node <<   " Ix=" << "Gx"                    << " "
                                                           << "Ty="      << msgType                 << " "
                                                           << "Kp=Suc"
                                                           << " Kpv="  << GxStats.succCount[i-1]     << " " << std::endl;
 
-       std::cout << curTime << " " << node <<   " Ix=" << "Gx"                    << " "
+       std::cout << curTime << " Ip=" << node <<   " Ix=" << "Gx"                    << " "
                                                           << "Ty="      << msgType                 << " "
                                                           << "Kp=Fail"
                                                           << " Kpv="      << GxStats.failCount[i-1]    << " " << std::endl;
-       std::cout << curTime << " " << node <<   " Ix=" << "Gx"                    << " "
+       std::cout << curTime << " Ip=" << node <<   " Ix=" << "Gx"                    << " "
                                                           << "Ty="      << msgType                 << " "
                                                           << "Kp=Tout"
                                                           << " Kpv="      << GxStats.timeoutCount[i-1]    << " " << std::endl;
 
-
        if(GxStats.latencySize[i-1] > 0)
        {
-           std::cout << curTime << " " << node <<   " Ix=" << "Gx"                    << " "
-                                                           << "Ty="      << msgType                 << " "
-                                                           << "Kp=Laty"
-                                                           << " Kpv=" <<  (int)((GxStats.latency[i-1]/GxStats.latencySize[i-1]) * 1000)<< std::endl;
+           std::cout << curTime << " Ip=" << node <<   " Ix=" << "Gx"                    << " "
+                                                              << "Ty="      << msgType                 << " "
+                                                              << "Kp=Laty"
+                                                              << " Kpv=" <<  (int)((GxStats.latency[i-1]/GxStats.latencySize[i-1])*1000)<< std::endl; 
        }
     }
 }
@@ -182,5 +159,5 @@ void GxInterface::clearStats()
 {
     memset(&GxStats,0,sizeof(CCGxStats));
     //req.clear();
-    res.clear();
+    //res.clear();
 }

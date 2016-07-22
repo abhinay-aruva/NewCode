@@ -16,7 +16,6 @@ struct CCGxStats
        unsigned int succCount[3];
        unsigned int failCount[3];
        unsigned int timeoutCount[3];
-       unsigned int unPairResCnt[3];
        unsigned int unKnwRes[3];
        unsigned int latencySize[3];
        double latency[3];
@@ -27,7 +26,6 @@ class GxInterface:public Interface
      private:
        CCGxStats GxStats;
        double TS;
-       int uid;
        double RTT;
 
        /* Local variables */
@@ -37,17 +35,23 @@ class GxInterface:public Interface
        unsigned int reqtype;
 
      public:
-       std::unordered_map<unsigned int, std::unordered_map<uint32_t, long long int> > req;
-       std::unordered_map<unsigned int, std::unordered_map<uint32_t, double> > res;
+       std::unordered_map<unsigned int, std::unordered_map<uint32_t, double> > req;
+       //std::unordered_map<unsigned int, std::unordered_map<uint32_t, double> > res;
 
-       std::unordered_map<uint32_t, long long int> tmp; 
-       std::unordered_map<uint32_t, long long int>::iterator it; 
+       /* Iterators for traversing req and res maps*/
+      //std::unordered_map<unsigned int, std::unordered_map<uint32_t, double> >::iterator it;
+      //std::unordered_map<uint32_t, double>::iterator it1;
+      //std::unordered_map<uint32_t, double> *tmp;
+
+      std::unordered_map<unsigned int, std::unordered_map<uint32_t, double> >::iterator reqIt;
+      std::unordered_map<uint32_t, double>::iterator reqIt1;
+      std::unordered_map<uint32_t, double> *reqTmp;
 
        int addPkt(Diameter &pkt);
        void printStats(std::string &node);
        void clearStats();
 
-       GxInterface(std::string &nodepair);
+       GxInterface();
 };
 
 #endif
