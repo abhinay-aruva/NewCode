@@ -1,0 +1,7 @@
+// Print the Result code statistics
+       std::cout << curTime << " " << node <<   " Ix="    << "Gx"                    << " "
+                                                          << "Ty="      << msgType                 << " "
+                                                          << "RESULT=SUCCESS"
+                                                          << "code=1001"        <<
+                                                          << " count="      << GxStats.resultCode[i-1][RC_1001]    << " " << std::endl;
+
